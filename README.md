@@ -67,6 +67,7 @@ services:
   tmdb-editor:
     image: pipi20xx/sy1024:latest
     container_name: emby-sytmdb
+    network_mode: bridge
     ports:
       - "8121:8000"
     volumes:
