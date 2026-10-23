@@ -1,0 +1,173 @@
+/**
+ * utilities.css — 通用复用组件
+ *
+ * 卡片悬浮、配置行、加载条、信息标签、键值行、状态点等。
+ * 视觉属性通过设计令牌（tokens.css）统一管理。
+ */
+
+/* ============================================================
+ * 通用卡片悬浮
+ * 结构部分（cursor + transition），视觉效果（transform + box-shadow）
+ * 在 visual.css §16 中通过令牌统一处理
+ * ============================================================ */
+
+.hover-lift {
+  cursor: pointer;
+}
+
+@keyframes loading-slide {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(150%); }
+  100% { transform: translateX(350%); }
+}
+
+@keyframes queue-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--v-theme-primary), 0.3); }
+  50% { box-shadow: 0 0 0 4px rgba(var(--v-theme-primary), 0); }
+}
+
+/* ============================================================
+ * 通用工具类
+ * ============================================================ */
+
+.font-mono {
+  font-family: monospace;
+}
+
+.min-width-0 {
+  min-width: 0;
+}
+
+.pre-wrap {
+  white-space: pre-wrap;
+}
+
+.pre-line {
+  white-space: pre-line;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* ============================================================
+ * 页面 / 状态结构
+ * ============================================================ */
+
+/* 详情页统一页面容器宽度 */
+.page-container {
+  max-width: 1400px;
+  margin-inline: auto;
+}
+
+/* 加载 / 错误占位容器统一最小高度 */
+.loading-state {
+  min-height: 400px;
+}
+
+/* 多行文本截断（-webkit-line-clamp） */
+.line-clamp-2,
+.line-clamp-3,
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 { -webkit-line-clamp: 2; }
+.line-clamp-3 { -webkit-line-clamp: 3; }
+.line-clamp-4 { -webkit-line-clamp: 4; }
+
+/* 海报宽高比（2:3） */
+.poster-aspect {
+  aspect-ratio: 2 / 3;
+}
+
+/* 海报圆角（统一引用设计令牌） */
+.poster-rounded {
+  border-radius: var(--am-surface-radius, 16px);
+}
+
+/* 卡片角标定位（配合 position-absolute / v-img overlay 使用） */
+.corner-badge {
+  position: absolute;
+  z-index: 10;
+}
+
+.corner-badge--tl { top: 8px; left: 8px; }
+.corner-badge--tr { top: 8px; right: 8px; }
+.corner-badge--bl { bottom: 8px; left: 8px; }
+
+/* ============================================================
+ * 滚动容器
+ * ============================================================ */
+
+.scroll-y {
+  overflow-y: auto;
+}
+
+.scroll-y-200 {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.scroll-y-400 {
+  height: 400px;
+  overflow-y: auto;
+}
+
+.scroll-y-500 {
+  height: 500px;
+  overflow-y: auto;
+}
+
+/* ============================================================
+ * JSON 查看
+ * ============================================================ */
+
+.json-viewer {
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.json-viewer--scroll {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* ============================================================
+ * 尺寸刻度（宽度 / 最大宽 / 最小宽，单位 px）
+ * 仅收录项目内实际使用的值，新增尺寸请先复用刻度。
+ * 带 -px 后缀以避免与 Vuetify 自带的 w-100/mw-100 等百分比刻度冲突
+ * ============================================================ */
+
+.w-40px   { width: 40px; }
+.w-60px   { width: 60px; }
+.w-100px  { width: 100px; }
+.w-120px  { width: 120px; }
+.w-140px  { width: 140px; }
+.w-180px  { width: 180px; }
+.w-280px  { width: 280px; }
+
+.mw-80px  { max-width: 80px; }
+.mw-110px { max-width: 110px; }
+.mw-120px { max-width: 120px; }
+.mw-140px { max-width: 140px; }
+.mw-160px { max-width: 160px; }
+.mw-180px { max-width: 180px; }
+.mw-200px { max-width: 200px; }
+.mw-300px { max-width: 300px; }
+.mw-360px { max-width: 360px; }
+
+.miw-120px { min-width: 120px; }
+.miw-150px { min-width: 150px; }
+.miw-160px { min-width: 160px; }
+
+/* ============================================================
+ * 链接还原（去掉默认下划线与主题色，继承父级文字颜色）
+ * ============================================================ */
+
+.link-unstyled {
+  text-decoration: none;
+  color: inherit;
+}

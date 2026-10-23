@@ -1,0 +1,177 @@
+/**
+ * appearance-dialogs.css — 外观定制对话框公共骨架
+ *
+ * 阴影 / 边框 / 圆角 / 主色 / 壁纸 / 玻璃设置 六个外观对话框
+ * 共用的结构类（原各组件 scoped 内逐字复制的骨架，统一收敛于此）。
+ *
+ * 预览方块的边框 / 圆角 / 过渡属性因对话框而异（迷你预览件，固定小圆角），
+ * 由各组件 scoped 样式补充；本文件只承载完全一致的骨架。
+ */
+
+/* ── 弹窗主体（grid 纵向排布）── */
+.appearance-dialog__body {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  grid-auto-rows: max-content;
+  padding: 20px 24px 24px;
+}
+
+/* ── 底部操作栏 ── */
+.appearance-dialog__actions {
+  flex: none;
+  padding: 16px 24px;
+}
+
+/* ── 小节标题 / 说明文字 ── */
+.appearance-dialog__label {
+  margin: 0 0 10px;
+  color: rgb(var(--v-theme-on-surface));
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.appearance-dialog__hint {
+  margin: 8px 0 0;
+  color: rgb(var(--v-theme-on-surface));
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+/* ── 预设选项网格（默认 5 列）── */
+.appearance-dialog__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* ── 预设选项按钮 ── */
+.appearance-dialog__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 4px;
+  border: 2px solid transparent;
+  border-radius: var(--am-list-item-radius, 12px);
+  background: rgba(var(--v-theme-on-surface), 0.03);
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.appearance-dialog__option:hover {
+  background: rgba(var(--v-theme-on-surface), 0.06);
+  transform: translateY(-2px);
+}
+
+.appearance-dialog__option--active {
+  border-color: rgb(var(--v-theme-primary));
+  background: rgba(var(--v-theme-primary), 0.08);
+}
+
+.appearance-dialog__option-label {
+  color: rgb(var(--v-theme-on-surface));
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* ── 预览方块基础（40×40；边框/圆角/过渡由各对话框补充）── */
+.appearance-dialog__preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: 40px;
+  inline-size: 40px;
+  background: rgba(var(--v-theme-on-surface), 0.05);
+}
+
+/* ── 滑块区 ── */
+.appearance-dialog__slider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.appearance-dialog__slider-header .appearance-dialog__label {
+  margin-block-end: 0;
+}
+
+/* 滑块旁的当前值（primary 强调色版本） */
+.appearance-dialog__current-value {
+  color: rgb(var(--v-theme-primary));
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.appearance-dialog__slider-wrapper {
+  margin-block-start: 8px;
+  padding-inline: 8px;
+}
+
+.appearance-dialog__tick-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-block-start: -4px;
+  padding-inline: 8px;
+}
+
+.appearance-dialog__tick-label {
+  color: rgb(var(--v-theme-on-surface));
+  font-size: 0.625rem;
+  text-align: center;
+  flex: 1;
+}
+
+.appearance-dialog__tick-label:first-child {
+  text-align: left;
+}
+
+.appearance-dialog__tick-label:last-child {
+  text-align: right;
+}
+
+/* ── 当前选中预览区 ── */
+.appearance-dialog__current {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  border-radius: var(--am-list-item-radius, 12px);
+  background: rgba(var(--v-theme-on-surface), 0.035);
+}
+
+/* 当前预览方块基础（48×48；边框/过渡由各对话框补充） */
+.appearance-dialog__current-preview {
+  block-size: 48px;
+  inline-size: 48px;
+  background: rgba(var(--v-theme-primary), 0.1);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.appearance-dialog__current-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.appearance-dialog__current-label {
+  color: rgb(var(--v-theme-on-surface));
+  font-size: 0.75rem;
+}
+
+.appearance-dialog__current-text {
+  color: rgb(var(--v-theme-on-surface));
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.appearance-dialog__current-hint {
+  color: rgb(var(--v-theme-on-surface));
+  font-size: 0.6875rem;
+}

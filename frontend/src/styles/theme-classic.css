@@ -1,0 +1,325 @@
+/**
+ * theme-classic.css — 经典实色主题
+ *
+ * 通过 html.glass-theme-classic 激活。
+ * 组件基础视觉由 tokens.css + visual.css 统一处理，
+ * 此文件只保留经典实色专属效果：
+ *   - Vuetify 主题变量
+ *   - 侧边栏/顶栏边框
+ *   - sticky-tabs 实色背景
+ *   - 下拉列表项紧凑布局
+ *   - 伪元素移除（::before / ::after）
+ *   - 自定义类边框色覆盖（cards.css 等中的白色边框 → 合适色）
+ *   - 详情页还原（移除 ACG 的黑色文字+白色描边）
+ *   - 输入框 focus 实色边框
+ *   - SnackBar 按钮颜色反转
+ *   - 日志终端配色
+ *   - 字体
+ *   - 移动端优化
+ */
+
+
+/* ================================================================
+ * 1. Vuetify 组件变量
+ * ================================================================ */
+
+html.glass-theme-classic .v-theme--light {
+  --v-theme-surface: 255, 255, 255;
+  --v-theme-surface-light: 255, 255, 255;
+  --v-theme-surface-variant: 245, 245, 245;
+  --v-theme-background: 255, 255, 255;
+}
+
+html.glass-theme-classic .v-theme--dark {
+  --v-theme-surface: 30, 30, 30;
+  --v-theme-surface-light: 30, 30, 30;
+  --v-theme-surface-variant: 42, 42, 42;
+  --v-theme-background: 18, 18, 18;
+}
+
+
+/* ================================================================
+ * 2. 侧边栏 / 顶栏 — 边框线
+ * ================================================================ */
+
+html.glass-theme-classic.glass-light .v-navigation-drawer {
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+html.glass-theme-classic.glass-dark .v-navigation-drawer {
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+html.glass-theme-classic.glass-light .v-app-bar,
+html.glass-theme-classic.glass-light .v-toolbar {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+html.glass-theme-classic.glass-dark .v-app-bar,
+html.glass-theme-classic.glass-dark .v-toolbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+
+/* ================================================================
+ * 3. Sticky Tabs — 实色背景 + 边框
+ * ================================================================ */
+
+html.glass-theme-classic.glass-light .sticky-tabs,
+html.glass-theme-classic.glass-light .sticky-sub-tabs {
+  background: var(--am-surface-bg) !important;
+  background-color: var(--am-surface-bg) !important;
+  border-bottom: 1px solid var(--am-divider-color) !important;
+}
+
+html.glass-theme-classic.glass-dark .sticky-tabs,
+html.glass-theme-classic.glass-dark .sticky-sub-tabs {
+  background: var(--am-body-bg) !important;
+  background-color: var(--am-body-bg) !important;
+  border-bottom: 1px solid var(--am-divider-color) !important;
+}
+
+
+/* ================================================================
+ * 4. 下拉列表项 — hover/active 背景
+ *    border-radius 和 margin 由 --am-list-item-* 令牌统一处理
+ * ================================================================ */
+
+html.glass-theme-classic.glass-light .v-menu .v-list-item:hover {
+  background: rgba(0, 0, 0, 0.04) !important;
+}
+
+html.glass-theme-classic.glass-dark .v-menu .v-list-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+html.glass-theme-classic .v-menu .v-list-item--active {
+  background: rgba(var(--v-theme-primary), 0.12) !important;
+}
+
+
+/* ================================================================
+ * 5. 伪元素移除 — 按钮 / Tab 弧光
+ * ================================================================ */
+
+html.glass-theme-classic .v-btn::before {
+  display: none !important;
+}
+
+html.glass-theme-classic .v-tab::after {
+  display: none !important;
+}
+
+html.glass-theme-classic .login-glass-panel::before {
+  display: none !important;
+}
+
+
+/* ================================================================
+ * 6. 边框修复
+ *    --am-surface-border 已设为 0.4 透明度可见边框。
+ *    outlined 卡片和 filled/solo 输入框需要额外覆盖。
+ *    自定义容器边框由 --am-content-border 令牌处理（同为 0.4 透明度）。
+ * ================================================================ */
+
+/* outlined 卡片 — 必须有可见边框 */
+html.glass-theme-classic.glass-light .v-card--variant-outlined {
+  border: 1px solid rgba(0, 0, 0, 0.4) !important;
+}
+
+html.glass-theme-classic.glass-dark .v-card--variant-outlined {
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+/* 搜索结果框 / sub-search 无边框无模糊 */
+html.glass-theme-classic .search-results-box {
+  border: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html.glass-theme-classic .sub-search-results {
+  border: none !important;
+}
+
+
+/* ================================================================
+ * 7. 详情页还原 — 移除 ACG 的黑色文字+白色描边
+ * ================================================================ */
+
+html.glass-theme-classic .tmdb-detail-view .v-chip,
+html.glass-theme-classic .tmdb-detail-view .v-chip .v-chip__content,
+html.glass-theme-classic .bangumi-detail-view .v-chip,
+html.glass-theme-classic .bangumi-detail-view .v-chip .v-chip__content,
+html.glass-theme-classic .person-detail-view .v-chip,
+html.glass-theme-classic .person-detail-view .v-chip .v-chip__content {
+  color: rgb(var(--v-theme-on-surface)) !important;
+  font-weight: 600 !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+html.glass-theme-classic .tmdb-detail-view .v-btn,
+html.glass-theme-classic .bangumi-detail-view .v-btn {
+  color: inherit !important;
+  border: none !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+html.glass-theme-classic .tmdb-detail-view .v-btn .v-icon,
+html.glass-theme-classic .bangumi-detail-view .v-btn .v-icon {
+  color: inherit !important;
+}
+
+html.glass-theme-classic .tmdb-detail-view .v-btn--variant-flat.bg-primary,
+html.glass-theme-classic .tmdb-detail-view .v-btn--variant-flat.v-btn--bg-primary,
+html.glass-theme-classic .tmdb-detail-view .v-btn--variant-flat.text-primary,
+html.glass-theme-classic .bangumi-detail-view .v-btn--variant-flat.bg-primary,
+html.glass-theme-classic .bangumi-detail-view .v-btn--variant-flat.v-btn--bg-primary,
+html.glass-theme-classic .bangumi-detail-view .v-btn--variant-flat.text-primary {
+  color: #fff !important;
+  -webkit-text-stroke: 0 !important;
+}
+
+html.glass-theme-classic .tmdb-detail-view .v-btn--variant-tonal.text-info,
+html.glass-theme-classic .tmdb-detail-view .v-btn--variant-tonal.v-btn--bg-info,
+html.glass-theme-classic .bangumi-detail-view .v-btn--variant-tonal.text-info,
+html.glass-theme-classic .bangumi-detail-view .v-btn--variant-tonal.v-btn--bg-info {
+  color: inherit !important;
+  -webkit-text-stroke: 0 !important;
+}
+
+/* 追剧日历 / 季度番剧表 下拉框还原 */
+html.glass-theme-classic .calendar-view .v-field,
+html.glass-theme-classic .seasonal-tab .v-field {
+  color: inherit !important;
+  border: none !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+html.glass-theme-classic .calendar-view .v-field .v-field__input,
+html.glass-theme-classic .calendar-view .v-field .v-label,
+html.glass-theme-classic .seasonal-tab .v-field .v-field__input,
+html.glass-theme-classic .seasonal-tab .v-field .v-label {
+  -webkit-text-stroke: 0 !important;
+}
+
+html.glass-theme-classic.glass-light .calendar-view .v-field .v-field__input,
+html.glass-theme-classic.glass-light .calendar-view .v-field .v-label,
+html.glass-theme-classic.glass-light .calendar-view .v-field .v-icon,
+html.glass-theme-classic.glass-light .seasonal-tab .v-field .v-field__input,
+html.glass-theme-classic.glass-light .seasonal-tab .v-field .v-label,
+html.glass-theme-classic.glass-light .seasonal-tab .v-field .v-icon {
+  color: rgb(0, 0, 0) !important;
+}
+
+html.glass-theme-classic.glass-dark .calendar-view .v-field .v-field__input,
+html.glass-theme-classic.glass-dark .calendar-view .v-field .v-label,
+html.glass-theme-classic.glass-dark .calendar-view .v-field .v-icon,
+html.glass-theme-classic.glass-dark .seasonal-tab .v-field .v-field__input,
+html.glass-theme-classic.glass-dark .seasonal-tab .v-field .v-label,
+html.glass-theme-classic.glass-dark .seasonal-tab .v-field .v-icon {
+  color: rgb(255, 255, 255) !important;
+}
+
+
+/* ================================================================
+ * 8. 输入框 focus — 实色边框高亮
+ * ================================================================ */
+
+html.glass-theme-classic .v-field--variant-outlined.v-field--focused {
+  box-shadow: 0 0 0 1px rgb(var(--v-theme-primary)) !important;
+}
+
+html.glass-theme-classic .v-field--variant-outlined.v-field--focused .v-field__outline {
+  --v-field-border-opacity: 1 !important;
+  color: rgb(var(--v-theme-primary)) !important;
+}
+
+html.glass-theme-classic .v-autocomplete .v-field--variant-outlined.v-field--focused,
+html.glass-theme-classic .v-combobox .v-field--variant-outlined.v-field--focused {
+  box-shadow: 0 0 0 1px rgb(var(--v-theme-primary)) !important;
+}
+
+/* filled / solo 边框 */
+html.glass-theme-classic.glass-light .v-field--variant-filled,
+html.glass-theme-classic.glass-light .v-field--variant-solo,
+html.glass-theme-classic.glass-light .v-field--variant-solo-filled {
+  border: 1px solid rgba(0, 0, 0, 0.4) !important;
+}
+
+html.glass-theme-classic.glass-dark .v-field--variant-filled,
+html.glass-theme-classic.glass-dark .v-field--variant-solo,
+html.glass-theme-classic.glass-dark .v-field--variant-solo-filled {
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+
+/* ================================================================
+ * 9. SnackBar 按钮颜色
+ * ================================================================ */
+
+html.glass-theme-classic.glass-light .v-snackbar__wrapper .v-btn {
+  color: rgb(0, 0, 0) !important;
+}
+
+html.glass-theme-classic.glass-dark .v-snackbar__wrapper .v-btn {
+  color: rgb(255, 255, 255) !important;
+}
+
+
+/* ================================================================
+ * 10. 登录按钮 — 无阴影
+ * ================================================================ */
+
+html.glass-theme-classic .login-glass-panel .v-btn--variant-flat.v-btn--bg-primary {
+  background: rgb(var(--v-theme-primary)) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+html.glass-theme-classic .login-glass-panel .v-field--variant-outlined {
+  background: var(--am-login-field-bg) !important;
+}
+
+
+/* ================================================================
+ * 11. 字体
+ * ================================================================ */
+
+html.glass-theme-classic {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "HarmonyOS Sans SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+html.glass-theme-classic h1,
+html.glass-theme-classic h2,
+html.glass-theme-classic h3,
+html.glass-theme-classic .v-card-title {
+  font-weight: 600;
+  letter-spacing: normal;
+}
+
+html.glass-theme-classic .page-subtitle {
+  font-weight: 500;
+}
+
+
+/* ================================================================
+ * 13. 移动端优化
+ * ================================================================ */
+
+@media (max-width: 960px) {
+  html.glass-theme-classic .hover-lift:hover,
+  html.glass-theme-classic .v-card--link:hover {
+    transform: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.glass-theme-classic .hover-lift:hover {
+    transform: none !important;
+  }
+}

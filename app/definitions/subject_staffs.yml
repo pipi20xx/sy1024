@@ -1,0 +1,1571 @@
+define:
+  type:
+    book: &TYPE_BOOK 1
+    anime: &TYPE_ANIME 2
+    music: &TYPE_MUSIC 3
+    game: &TYPE_GAME 4
+    real: &TYPE_REAL 6
+
+  categories:
+    anime:
+      - &ANIME_DIRECTOR   { order: 1,  en: director,   cn: '导演类'    }
+      - &ANIME_STORYBOARD { order: 2,  en: storyboard, cn: '分镜/脚本类' }
+      - &ANIME_DIRECTION  { order: 3,  en: direction,  cn: '演出类'    }
+      - &ANIME_ANIMATION  { order: 4,  en: animation,  cn: '作画类'    }
+      - &ANIME_DESIGN     { order: 5,  en: design,     cn: '设定类'    }
+      - &ANIME_ART        { order: 6,  en: art,        cn: '美术类'    }
+      - &ANIME_MUSIC      { order: 7,  en: music,      cn: '声音类'    }
+      - &ANIME_PRODUCTION { order: 8,  en: production, cn: '制作类'    }
+      - &ANIME_PRODUCER   { order: 9,  en: producer,   cn: '制片类'    }
+      - &ANIME_COLOR      { order: 10, en: colorist,   cn: '色彩类'    }
+      - &ANIME_VISUAL     { order: 11, en: visual,     cn: '视觉类'    }
+      - &ANIME_ASSISTANT  { order: 12, en: assistant,  cn: '助理类'    }
+    game:
+      - &GAME_PRODUCER    { order: 1,  en: producer,    cn: '发行类' }
+      - &GAME_DIRECTOR    { order: 2,  en: director,    cn: '导演类' }
+      - &GAME_STORYBOARD  { order: 3,  en: storyboard,  cn: '脚本类' }
+      - &GAME_DESIGN      { order: 4,  en: design,      cn: '设定类' }
+      - &GAME_ART         { order: 5,  en: art,         cn: '美术类' }
+      - &GAME_ANIMATION   { order: 6,  en: animation,   cn: '动画类' }
+      - &GAME_MUSIC       { order: 7,  en: music,       cn: '声音类' }
+      - &GAME_PRODUCTION  { order: 8,  en: production,  cn: '制作/程序类' }
+      - &GAME_ASSISTANT   { order: 0,  en: assistant,   cn: '助理类' }
+
+  types:
+    anime: &ANIME_STAFFS
+      1:
+        en: "Original Creator/Original Work"
+        cn: "原作"
+        jp: ""
+        categories:
+          - *ANIME_DESIGN
+        
+      74:
+        en: "Chief Director"
+        cn: "总导演"
+        jp: "総監督 / チーフディレクター"
+        categories:
+          - *ANIME_DIRECTOR
+      2:
+        en: "Director/Direction"
+        cn: "导演"
+        jp: "監督 シリーズ監督"
+        rdf: "directedBy"
+        categories:
+          - *ANIME_DIRECTOR
+      72:
+        en: "Assistant Director"
+        cn: "副导演"
+        jp: "助監督 / 監督補佐"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_ASSISTANT
+
+      3:
+        en: "Script/Screenplay"
+        cn: "脚本"
+        jp: "シナリオ"
+        categories:
+          - *ANIME_STORYBOARD
+
+      4:
+        en: "Storyboard"
+        cn: "分镜"
+        jp: "コンテ  ストーリーボード  画コンテ  絵コンテ"
+        categories:
+          - *ANIME_STORYBOARD
+      104:
+        en: ""
+        cn: "分镜协力"
+        jp: "絵コンテ協力 コンテ協力"
+        categories:
+          - *ANIME_STORYBOARD
+          - *ANIME_ASSISTANT
+      105:
+        en: ""
+        cn: "分镜抄写"
+        jp: "絵コンテ清書 コンテ清書"
+        categories:
+          - *ANIME_STORYBOARD
+          - *ANIME_ASSISTANT
+
+      89:
+        en: "Chief Episode Direction"
+        cn: "主演出"
+        jp: "チーフ演出"
+        categories:
+          - *ANIME_DIRECTION
+      5:
+        en: "Episode Direction"
+        cn: "演出"
+        jp: ""
+        categories:
+          - *ANIME_DIRECTION
+      91:
+        en: "Assistant Episode Direction"
+        cn: "演出助理"
+        jp: "演出助手 演出補佐 演出協力"
+        categories:
+          - *ANIME_DIRECTION
+          - *ANIME_ASSISTANT
+
+      128:
+        en: "OP・ED Direction"
+        cn: "OP・ED 演出"
+        jp: "OP・ED 演出"
+        categories:
+          - *ANIME_DIRECTION
+
+      129:
+        en: "Bank Storyboard Direction"
+        cn: "Bank 分镜演出"
+        jp: "バンク コンテ・演出"
+        categories:
+          - *ANIME_DIRECTION
+
+      130:
+        en: "Live Storyboard Direction"
+        cn: "Live 分镜演出"
+        jp: "ライブ コンテ・演出"
+        categories:
+          - *ANIME_DIRECTION
+
+      131:
+        en: "Meta-story Storyboard Direction"
+        cn: "剧中剧分镜演出"
+        jp: "劇中劇 コンテ・演出"
+        categories:
+          - *ANIME_DIRECTION
+          
+      6:
+        en: "Music"
+        cn: "音乐"
+        jp: "楽曲  音楽"
+        categories:
+          - *ANIME_MUSIC
+      7:
+        en: "Original Character Design"
+        cn: "人物原案"
+        jp: "キャラ原案"
+        categories:
+          - *ANIME_DESIGN
+      8:
+        en: "Character Design"
+        cn: "人物设定"
+        jp: "キャラ設定"
+        categories:
+          - *ANIME_DESIGN
+      106:
+        en: "Sub-Character Design"
+        cn: "副人物设定"
+        jp: "サブキャラクターデザイン"
+        categories:
+          - *ANIME_DESIGN
+      107:
+        en: "Guest character design"
+        cn: "客座人物设定"
+        jp: "ゲストキャラクターデザイン"
+        categories:
+          - *ANIME_DESIGN
+      132:
+        en: "Meta-story Character Design"
+        cn: "剧中剧人设"
+        jp: "劇中劇 キャラクターデザイン"
+        categories:
+          - *ANIME_DESIGN
+
+      9:
+        en: "Layout"
+        cn: "构图"
+        jp: "レイアウト"
+        categories:
+          - *ANIME_DIRECTION
+      108:
+        en: ""
+        cn: "构图监修"
+        jp: "レイアウト監修"
+        categories:
+          - *ANIME_DIRECTION
+
+      10:
+        en: "Series Composition"
+        cn: "系列构成"
+        jp: "シナリオディレクター  構成  シリーズ構成  脚本構成"
+        categories:
+          - *ANIME_STORYBOARD
+      11:
+        en: "Art Direction"
+        cn: "美术监督"
+        jp: "美術監督 アートディレクション 背景監督"
+        categories:
+          - *ANIME_ART
+          - *ANIME_DIRECTOR
+      71:
+        en: "Art Design"
+        cn: "美术设计"
+        jp: "美術設定"
+        categories:
+          - *ANIME_ART
+          - *ANIME_DESIGN
+      96:
+        en: ""
+        cn: "美术板"
+        jp: "美術ボード"
+        categories:
+          - *ANIME_ART
+      97:
+        en: ""
+        cn: "美术"
+        jp: "美術"
+        categories:
+          - *ANIME_ART
+      98:
+        en: ""
+        cn: "印象板"
+        jp: "イメージボード"
+        categories:
+          - *ANIME_ART
+          - *ANIME_DESIGN
+
+      13:
+        en: "Color Design"
+        cn: "色彩设计"
+        jp: "色彩設定"
+        categories:
+          - *ANIME_DESIGN
+          - *ANIME_COLOR
+
+      16:
+        en: "Mechanical Design"
+        cn: "机械设定"
+        jp: "メカニック設定"
+        categories:
+          - *ANIME_DESIGN
+      112:
+        en: "Concept Design"
+        cn: "概念设计"
+        jp: "コンセプトデザイン"
+        categories:
+          - *ANIME_DESIGN
+      113:
+        en: "Costume Design"
+        cn: "服装设计"
+        jp: "衣装デザイン 衣装設定"
+        categories:
+          - *ANIME_DESIGN
+
+      114:
+        en: "Title Design"
+        cn: "标题设计"
+        jp: "タイトルデザイン"
+        categories:
+          - *ANIME_DESIGN
+
+      115:
+        en: "Setting Cooperation"
+        cn: "设定协力"
+        jp: "設定協力 デザイン協力"
+        categories:
+          - *ANIME_DESIGN
+          - *ANIME_ASSISTANT
+
+      19:
+        en: "Prop Design"
+        cn: "道具设计"
+        jp: "プロップデザイン"
+        categories:
+          - *ANIME_DESIGN
+      99:
+        en: "2D WORKS"
+        cn: "2D 设计"
+        jp: "2D ワークス"
+        categories:
+          - *ANIME_DESIGN
+      100:
+        en: "3D WORKS"
+        cn: "3D 设计"
+        jp: "3D ワークス"
+        categories:
+          - *ANIME_DESIGN
+
+      14:
+        en: "Chief Animation Director"
+        cn: "总作画监督"
+        jp: "チーフ作画監督"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_ANIMATION
+      110:
+        en: ""
+        cn: "总作画监督助理"
+        jp: "総作画監督補佐 総作監補佐"
+        categories:
+          - *ANIME_ASSISTANT
+          - *ANIME_ANIMATION
+      15:
+        en: "Animation Direction"
+        cn: "作画监督"
+        jp: "作監 アニメーション演出"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_ANIMATION
+      90:
+        en: "Assistant Animation Direction"
+        cn: "作画监督助理"
+        jp: "作画監督補佐"
+        categories:
+          - *ANIME_ASSISTANT
+          - *ANIME_ANIMATION
+      109:
+        en: ""
+        cn: "构图作画监督"
+        jp: "レイアウト作画監督 レイアウト作監"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_ANIMATION
+      70:
+        en: "Mechanical Animation Direction"
+        cn: "机械作画监督"
+        jp: "メカニック作監"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_ANIMATION
+      77:
+        en: "Action Animation Direction"
+        cn: "动作作画监督"
+        jp: "アクション作画監督"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_ANIMATION
+      17:
+        en: "Director of Photography"
+        cn: "摄影监督"
+        jp: "撮影監督"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_PRODUCTION
+      111:
+        en: ""
+        cn: "道具作画监督"
+        jp: "プロップ作画監督 プロップ作監"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_ANIMATION
+
+      69:
+        en: "CG Director"
+        cn: "CG 导演"
+        jp: "CG 監督"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_PRODUCTION
+      86:
+        en: "3DCG Director"
+        cn: "3DCG 导演"
+        jp: "3DCG 監督"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_PRODUCTION
+      101:
+        en: "Technical Director"
+        cn: "技术导演"
+        jp: "テクニカルディレクター"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_PRODUCTION
+      102:
+        en: ""
+        cn: "特技导演"
+        jp: "特撮監督"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_PRODUCTION
+      137:
+        en: ""
+        cn: "动作导演"
+        jp: "アクション監督"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_PRODUCTION
+          
+      18:
+        en: "Supervision/Supervisor"
+        cn: "监修"
+        jp: "シリーズ監修 スーパーバイザー"
+        categories:
+          - *ANIME_DIRECTOR
+      20:
+        en: "Key Animation"
+        cn: "原画"
+        jp: "作画 原画"
+        categories:
+          - *ANIME_DIRECTION
+          - *ANIME_ANIMATION
+      21:
+        en: "2nd Key Animation"
+        cn: "第二原画"
+        jp: "原画協力"
+        categories:
+          - *ANIME_DIRECTION
+          - *ANIME_ANIMATION
+      92:
+        en: "Main Animator"
+        cn: "主动画师"
+        jp: "メインアニメーター"
+        categories:
+          - *ANIME_DIRECTION
+          - *ANIME_ANIMATION
+      22:
+        en: "Animation Check"
+        cn: "动画检查"
+        jp: "動画チェック"
+        categories:
+          - *ANIME_DIRECTION
+          - *ANIME_ANIMATION
+      67:
+        en: "Animation Work"
+        cn: "动画制作"
+        jp: "アニメーション制作 アニメ制作 アニメーション"
+        categories:
+          - *ANIME_PRODUCTION
+      73:
+        en: "OP ED"
+        cn: "OP・ED 分镜"
+        jp: "OP・ED 分鏡"
+        categories:
+          - *ANIME_STORYBOARD
+      82:
+        en: "Photography"
+        cn: "摄影"
+        jp: "撮影"
+        categories:
+          - *ANIME_PRODUCTION
+
+      65:
+        en: "Music Work"
+        cn: "音乐制作"
+        jp: "楽曲制作 音楽制作"
+        categories:
+          - *ANIME_MUSIC
+          - *ANIME_PRODUCTION
+      85:
+        en: "Music Producer"
+        cn: "音乐制作人"
+        jp: "音楽プロデューサー"
+        categories:
+          - *ANIME_MUSIC
+          - *ANIME_PRODUCTION
+      55:
+        en: "Music Assistant"
+        cn: "音乐助理"
+        jp: "音楽アシスタント"
+        categories:
+          - *ANIME_MUSIC
+          - *ANIME_ASSISTANT
+      116:
+        en: "Music Director"
+        cn: "音乐监督"
+        jp: "音楽ディレクター"
+        categories:
+          - *ANIME_MUSIC
+          - *ANIME_DIRECTOR
+
+      117:
+        en: "Music Selection"
+        cn: "选曲"
+        jp: "選曲"
+        categories:
+          - *ANIME_MUSIC
+
+      118:
+        en: "Inserted Song Lyrics"
+        cn: "插入歌作词"
+        jp: "Insert Song Lyrics"
+        categories:
+          - *ANIME_MUSIC
+
+      119:
+        en: "Inserted Song Composition"
+        cn: "插入歌作曲"
+        jp: "Insert Song Composition"
+        categories:
+          - *ANIME_MUSIC
+
+      120:
+        en: "Inserted Song Arrangement"
+        cn: "插入歌编曲"
+        jp: "Insert Song Arrangement"
+        categories:
+          - *ANIME_MUSIC
+          
+      24:
+        en: "Associate Producer"
+        cn: "制作助理"
+        jp: "製作補佐 アソシエイトプロデューサー"
+        categories:
+          - *ANIME_PRODUCTION
+          - *ANIME_ASSISTANT
+      25:
+        en: "Background Art"
+        cn: "背景美术"
+        jp: "背景"
+        categories:
+          - *ANIME_ART
+          - *ANIME_DESIGN
+      26:
+        en: "Color Setting"
+        cn: "色彩指定"
+        jp: ""
+        categories:
+          - *ANIME_DESIGN
+          - *ANIME_COLOR
+      93:
+        en: ""
+        cn: "上色"
+        jp: "仕上"
+        categories:
+          - *ANIME_COLOR
+      94:
+        en: ""
+        cn: "上色检查"
+        jp: "仕上検查"
+        categories:
+          - *ANIME_COLOR
+      95:
+        en: ""
+        cn: "色彩检查"
+        jp: "色検查"
+        categories:
+          - *ANIME_COLOR
+      103:
+        en: "Color Script"
+        cn: "色彩脚本"
+        jp: "カラースクリプト"
+        categories:
+          - *ANIME_COLOR
+      
+      27:
+        en: "Digital Paint"
+        cn: "数码绘图"
+        jp: ""
+        categories:
+          - *ANIME_DESIGN
+      75:
+        en: "3DCG"
+        cn: "3DCG"
+        jp: ""
+        categories:
+          - *ANIME_PRODUCTION
+      37:
+        en: "Production Manager"
+        cn: "制作管理"
+        jp: "制作マネージャー 制作担当 制作班長"
+        categories:
+          - *ANIME_PRODUCTION
+      28:
+        en: "Editing"
+        cn: "剪辑"
+        jp: "編集"
+        categories:
+          - *ANIME_PRODUCTION
+      29:
+        en: "Original Plan"
+        cn: "原案"
+        jp: ""
+        categories:
+          - *ANIME_STORYBOARD
+      30:
+        en: "Theme Song Arrangement"
+        cn: "主题歌编曲"
+        jp: ""
+        categories:
+          - *ANIME_MUSIC
+      31:
+        en: "Theme Song Composition"
+        cn: "主题歌作曲"
+        jp: ""
+        categories:
+          - *ANIME_MUSIC
+      32:
+        en: "Theme Song Lyrics"
+        cn: "主题歌作词"
+        jp: ""
+        categories:
+          - *ANIME_MUSIC
+      33:
+        en: "Theme Song Performance"
+        cn: "主题歌演出"
+        jp: ""
+        categories:
+          - *ANIME_MUSIC
+      34:
+        en: "Inserted Song Performance"
+        cn: "插入歌演出"
+        jp: ""
+        categories:
+          - *ANIME_MUSIC
+      35:
+        en: "Planning"
+        cn: "企画"
+        jp: "プランニング  企画開発"
+        categories:
+          - *ANIME_PRODUCTION
+      36:
+        en: "Planning Producer"
+        cn: "企划制作人"
+        jp: "企画プロデューサー 企画営業プロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+      38:
+        en: "Publicity"
+        cn: "宣传"
+        jp: "パブリシティ  宣伝  広告宣伝  番組宣伝  製作宣伝"
+        categories:
+          - *ANIME_PRODUCTION
+      39:
+        en: "Recording"
+        cn: "录音"
+        jp: "録音"
+        categories:
+          - *ANIME_MUSIC
+      40:
+        en: "Recording Assistant"
+        cn: "录音助理"
+        jp: "録音アシスタント  録音助手"
+        categories:
+          - *ANIME_MUSIC
+          - *ANIME_ASSISTANT
+      41:
+        en: "Series Production Director"
+        cn: "系列监督"
+        jp: ""
+        categories:
+          - *ANIME_DIRECTOR
+      42:
+        en: "Production"
+        cn: "製作"
+        jp: ""
+        categories:
+          - *ANIME_PRODUCTION
+      63:
+        en: "Production"
+        cn: "制作"
+        jp: "製作 製作スタジオ"
+        categories:
+          - *ANIME_PRODUCTION
+      43:
+        en: "Setting"
+        cn: "设定"
+        jp: "設定"
+        categories:
+          - *ANIME_DESIGN
+      84:
+        en: "Design Manager"
+        cn: "设定制作"
+        jp: "設定制作 制作設定"
+        desc: "有时需要额外的设计工作，联系负责部门并监督工作确保交付"
+        categories:
+          - *ANIME_DESIGN
+      44:
+        en: "Sound Director"
+        cn: "音响监督"
+        jp: ""
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_MUSIC
+      45:
+        en: "Sound"
+        cn: "音响"
+        jp: "音響 音声"
+        categories:
+          - *ANIME_MUSIC
+      46:
+        en: "Sound Effects"
+        cn: "音效"
+        jp: "音響効果"
+        categories:
+          - *ANIME_MUSIC
+          
+      88:
+        en: "Special Effects Animation Direction"
+        cn: "特效作画监督"
+        jp: "エフェクト作画監督"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_PRODUCTION
+          - *ANIME_VISUAL
+      47:
+        en: "Special Effects"
+        cn: "特效"
+        jp: "特殊効果"
+        categories:
+          - *ANIME_PRODUCTION
+          - *ANIME_VISUAL
+
+      133:
+        en: "Visual Director"
+        cn: "视觉导演"
+        jp: "ビジュアルディレクター"
+        categories:
+          - *ANIME_VISUAL
+          - *ANIME_DIRECTOR
+
+      136:
+        en: "Visual Effects"
+        cn: "视觉效果"
+        jp: "ビジュアルエフェクト"
+        categories:
+          - *ANIME_VISUAL
+
+      134:
+        en: "Creative Supervisor/Director"
+        cn: "创意总监"
+        jp: "クリエイティブスーパーバイザー クリエイティブディレクター"
+        categories:
+          - *ANIME_DIRECTOR
+
+      135:
+        en: "Tokusatsu Effects"
+        cn: "特摄效果"
+        jp: "特撮"
+        categories:
+          - *ANIME_PRODUCTION
+          - *ANIME_VISUAL
+
+      138:
+        en: "Eyecatch Art"
+        cn: "转场绘"
+        jp: "アイキャッチ"
+        categories:
+          - *ANIME_ANIMATION
+          - *ANIME_VISUAL
+
+      139:
+        en: "Illustration"
+        cn: "插画"
+        jp: "イラスト"
+        categories:
+          - *ANIME_ANIMATION
+          - *ANIME_DESIGN
+
+      140:
+        en: "Character Animation Director"
+        cn: "角色作画监督"
+        jp: "キャラクター作画監督"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_ANIMATION
+
+      141:
+        en: "Animation Supervisor"
+        cn: "作画监修"
+        jp: "作画監修"
+        categories:
+          - *ANIME_DIRECTOR
+          - *ANIME_ANIMATION
+
+      142:
+        en: "Mechanical Design Concept"
+        cn: "机设原案"
+        jp: "メカニカル原案"
+        categories:
+          - *ANIME_DESIGN
+
+      143:
+        en: "Concept Art"
+        cn: "概念艺术"
+        jp: "コンセプトアート"
+        categories:
+          - *ANIME_DESIGN
+
+      144:
+        en: "Visual Concept"
+        cn: "视觉概念"
+        jp: "ビジュアルコンセプト"
+        categories:
+          - *ANIME_DESIGN
+          - *ANIME_VISUAL
+
+      145:
+        en: "Scene Design"
+        cn: "画面设计"
+        jp: "画面設計"
+        categories:
+          - *ANIME_DESIGN
+          - *ANIME_VISUAL
+
+      146:
+        en: "Monster Design"
+        cn: "怪物设计"
+        jp: "モンスターデザイン"
+        categories:
+          - *ANIME_DESIGN
+
+      147:
+        en: "Story Concept"
+        cn: "故事概念"
+        jp: "ストーリーコンセプト"
+        categories:
+          - *ANIME_STORYBOARD
+
+      148:
+        en: "Scenario Coordinator"
+        cn: "剧本协调"
+        jp: "シナリオコーディネーター"
+        categories:
+          - *ANIME_STORYBOARD
+
+      149:
+        en: "Script Cooperation"
+        cn: "脚本协力"
+        jp: "脚本協力"
+        categories:
+          - *ANIME_STORYBOARD
+          - *ANIME_ASSISTANT
+
+      150:
+        en: "Associate Series Composition"
+        cn: "副系列构成"
+        jp: "副シリーズ構成"
+        categories:
+          - *ANIME_STORYBOARD
+
+      151:
+        en: "Series Composition Cooperation"
+        cn: "构成协力"
+        jp: "構成協力"
+        categories:
+          - *ANIME_STORYBOARD
+          - *ANIME_ASSISTANT
+
+      152:
+        en: "Recording Studio"
+        cn: "录音工作室"
+        jp: "録音スタジオ"
+        categories:
+          - *ANIME_MUSIC
+          - *ANIME_PRODUCTION
+
+      153:
+        en: "Sound Mixing"
+        cn: "整音"
+        jp: "整音"
+        categories:
+          - *ANIME_MUSIC
+
+      154:
+        en: "Sound Production Coordinator"
+        cn: "音响制作担当"
+        jp: "音響制作担当"
+        categories:
+          - *ANIME_MUSIC
+          - *ANIME_PRODUCTION
+
+      155:
+        en: "Online Editing"
+        cn: "在线剪辑"
+        jp: "オンライン編集"
+        categories:
+          - *ANIME_PRODUCTION
+
+      156:
+        en: "Offline Editing"
+        cn: "离线剪辑"
+        jp: "オフライン編集"
+        categories:
+          - *ANIME_PRODUCTION
+
+      157:
+        en: "3D Animator"
+        cn: "3D 动画师"
+        jp: "3Dアニメーター  3Dアニメーション"
+        categories:
+          - *ANIME_PRODUCTION
+          - *ANIME_ANIMATION
+
+      158:
+        en: "CG Producer"
+        cn: "CG 制作人"
+        jp: "CGプロデューサー  CGIプロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_PRODUCTION
+
+      159:
+        en: "Publicity Producer"
+        cn: "宣传制片人"
+        jp: "宣伝プロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_PRODUCTION
+
+      160:
+        en: "Art Producer"
+        cn: "美术制作人"
+        jp: "美術プロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_ART
+
+      161:
+        en: "Sound Producer"
+        cn: "音响制作人"
+        jp: "音響プロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_MUSIC
+
+      162:
+        en: "CG Production Coordinator"
+        cn: "CG 制作进行"
+        jp: "CG進行"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_PRODUCTION
+
+      163:
+        en: "Art Production Coordinator"
+        cn: "美术制作进行"
+        jp: "美術進行"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_ART
+          - *ANIME_PRODUCTION
+
+      164:
+        en: "Assistant Art Director"
+        cn: "美术监督助理"
+        jp: "美術監督補佐"
+        categories:
+          - *ANIME_ASSISTANT
+          - *ANIME_ART
+
+      165:
+        en: "Assistant Color Designer"
+        cn: "色彩设计助理"
+        jp: "色彩設計補佐"
+        categories:
+          - *ANIME_ASSISTANT
+          - *ANIME_COLOR
+
+      166:
+        en: "Assistant Director of Photography"
+        cn: "摄影监督助理"
+        jp: "撮影監督補佐"
+        categories:
+          - *ANIME_ASSISTANT
+          - *ANIME_PRODUCTION
+
+      167:
+        en: "Assistant Production Desk"
+        cn: "制作管理助理"
+        jp: "制作デスク補佐"
+        categories:
+          - *ANIME_ASSISTANT
+          - *ANIME_PRODUCTION
+
+      168:
+        en: "Assistant Design Manager"
+        cn: "设定制作助理"
+        jp: "設定制作補佐"
+        categories:
+          - *ANIME_ASSISTANT
+          - *ANIME_DESIGN
+
+      48:
+        en: "ADR Director"
+        cn: "配音监督"
+        jp: ""
+        categories:
+          - *ANIME_MUSIC
+          - *ANIME_DIRECTOR
+      49:
+        en: "Co-Director"
+        cn: "联合导演"
+        jp: ""
+        categories:
+          - *ANIME_DIRECTOR
+      50:
+        en: "Setting"
+        cn: "背景设定"
+        jp: "基本設定  場面設定  場面設計  設定"
+        categories:
+          - *ANIME_DESIGN
+      51:
+        en: "In-Between Animation"
+        cn: "补间动画"
+        jp: "動画"
+        categories:
+          - *ANIME_ANIMATION
+      58:
+        en: "Chief Producer"
+        cn: "总制片人"
+        jp: "チーフプロデューサー チーフ制作 総合プロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+      59:
+        en: "Co-Producer"
+        cn: "联合制片人"
+        jp: ""
+        categories:
+          - *ANIME_PRODUCER
+      54:
+        en: "Producer"
+        cn: "制片人"
+        jp: "プロデュース  プロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+      52:
+        en: "Executive Producer"
+        cn: "执行制片人"
+        jp: "製作総指揮"
+        categories:
+          - *ANIME_PRODUCER
+      53:
+        en: "Assistant Producer"
+        cn: "助理制片人"
+        jp: "協力プロデューサー  アシスタントプロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_ASSISTANT
+      23:
+        en: "Assistant Producer"
+        cn: "助理制片人"
+        jp: "協力プロデューサー（⚠️ 待合并）"
+      87:
+        en: "Animation Producer"
+        cn: "动画制片人"
+        jp: "アニメプロデューサー  アニメーションプロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+
+      121:
+        en: "Creative Producer"
+        cn: "创意制片人"
+        jp: "クリエイティブプロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+
+      122:
+        en: "Associate Producer"
+        cn: "副制片人"
+        jp: "アソシエイトプロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_ASSISTANT
+
+      123:
+        en: "Chief Production Supervisor"
+        cn: "制作统括"
+        jp: "制作統括"
+        categories:
+          - *ANIME_PRODUCTION
+
+      124:
+        en: "Line Producer"
+        cn: "现场制片人"
+        jp: "ラインプロデューサー"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_PRODUCTION
+
+      125:
+        en: "Literary Producer"
+        cn: "文艺制作"
+        jp: "文芸制作"
+        categories:
+          - *ANIME_PRODUCER
+
+      127:
+        en: "Planning Cooperation"
+        cn: "企画协力"
+        jp: "企画協力"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_ASSISTANT
+
+      80:
+        en: "Supervising Producer"
+        cn: "监制"
+        jp: "プロデュース"
+        categories:
+          - *ANIME_PRODUCER
+      56:
+        en: "Assistant Production Manager"
+        cn: "制作进行"
+        jp: "制作進行"
+        desc: "管理动画的制作时程、协调各部门作业、回收作画原稿等"
+        categories:
+          - *ANIME_PRODUCTION
+      83:
+        en: "Assistant Production Manager Assistance"
+        cn: "制作进行协力"
+        jp: "制作進行協力"
+        categories:
+          - *ANIME_PRODUCTION
+          - *ANIME_ASSISTANT
+      57:
+        en: "Casting Director"
+        cn: "演员监督"
+        jp: "キャスティングコーディネーター監督"
+        categories:
+          - *ANIME_PRODUCER
+          - *ANIME_DIRECTOR
+      60:
+        en: "Dialogue Editing"
+        cn: "台词编辑"
+        jp: "台詞編集"
+        categories:
+          - *ANIME_PRODUCTION
+      61:
+        en: "Post-Production Assistant"
+        cn: "后期制片协调"
+        jp: "ポストプロダクション協力"
+        categories:
+          - *ANIME_PRODUCTION
+          - *ANIME_ASSISTANT
+      62:
+        en: "Production Assistant"
+        cn: "制作助理"
+        jp: "制作アシスタント 制作補佐 製作補"
+        categories:
+          - *ANIME_PRODUCTION
+          - *ANIME_ASSISTANT
+      64:
+        en: "Production Coordination"
+        cn: "制作协调"
+        jp: "制作コーディネーター"
+        categories:
+          - *ANIME_PRODUCTION
+      76:
+        en: "Work Assistance"
+        cn: "制作协力"
+        jp: "制作協力 / 作品協力"
+        categories:
+          - *ANIME_PRODUCTION
+          - *ANIME_ASSISTANT
+      66:
+        en: "Special Thanks"
+        cn: "特别鸣谢"
+        jp: "友情協力"
+        categories:
+          - *ANIME_ASSISTANT
+      81:
+        en: "Assistance"
+        cn: "协力"
+        jp: "協力"
+        categories:
+          - *ANIME_ASSISTANT
+
+    game: &GAME_STAFFS
+      1001:
+        en: "Developer"
+        cn: "开发"
+        jp: "開発元"
+        categories:
+          - *GAME_PRODUCER
+      1002:
+        en: "Publisher"
+        cn: "发行"
+        jp: "発売元"
+        categories:
+          - *GAME_PRODUCER
+      1003:
+        en: "Game Designer"
+        cn: "游戏设计师"
+        jp: "ゲームクリエイター"
+        categories:
+          - *GAME_DIRECTOR
+      1015:
+        en: ""
+        cn: "原作"
+        jp: ""
+        categories:
+          - *GAME_DESIGN
+      1016:
+        en: "Director/Direction"
+        cn: "导演"
+        jp: "監督 演出 シリーズ監督"
+        categories:
+          - *GAME_DIRECTOR
+      1032:
+        en: "Producer"
+        cn: "制作人"
+        jp: "プロデューサー"
+        categories:
+          - *GAME_DIRECTOR
+      1028:
+        en: ""
+        cn: "企画"
+        jp: ""
+        categories:
+          - *GAME_PRODUCTION
+      1026:
+        en: ""
+        cn: "监修"
+        jp: "監修"
+        categories:
+          - *GAME_DIRECTOR
+      1004:
+        en: ""
+        cn: "剧本"
+        jp: "腳本"
+        categories:
+          - *GAME_STORYBOARD
+      1027:
+        en: ""
+        cn: "系列构成"
+        jp: "シリーズ構成"
+        categories:
+          - *GAME_STORYBOARD
+      1031:
+        en: ""
+        cn: "作画监督"
+        jp: "作画監督"
+        categories:
+          - *GAME_ART
+      1013:
+        en: ""
+        cn: "原画"
+        jp: ""
+        categories:
+          - *GAME_ART
+      1008:
+        en: "Character Design"
+        cn: "人物设定"
+        jp: "キャラ設定 キャラクターデザイン"
+        categories:
+          - *GAME_DESIGN
+      1029:
+        en: "Mechanical Design"
+        cn: "机械设定"
+        jp: "メカニック設定"
+        categories:
+          - *GAME_DESIGN
+      1005:
+        en: ""
+        cn: "美工"
+        jp: "美術"
+        categories:
+          - *GAME_ART
+      1023:
+        en: ""
+        cn: "CG 监修"
+        jp: "CG 監修"
+        categories:
+          - *GAME_ART
+      1024:
+        en: ""
+        cn: "SD原画"
+        jp: ""
+        categories:
+          - *GAME_ART
+      1025:
+        en: ""
+        cn: "背景"
+        jp: ""
+        categories:
+          - *GAME_ART
+      1033:
+        en: "Cover Art"
+        cn: "海报"
+        jp: "表紙"
+        categories:
+          - *GAME_ART
+      1030:
+        en: "Sound Director"
+        cn: "音响监督"
+        jp: ""
+        categories:
+          - *GAME_MUSIC
+      1006:
+        en: ""
+        cn: "音乐"
+        jp: "音楽"
+        categories:
+          - *GAME_MUSIC
+      1021:
+        en: "Program"
+        cn: "程序"
+        jp: "プログラム"
+        categories:
+          - *GAME_PRODUCTION
+      1014:
+        en: "Animation Work"
+        cn: "动画制作"
+        jp: "アニメーション制作 アニメ制作 アニメーション"
+        categories:
+          - *GAME_ANIMATION
+      1017:
+        en: ""
+        cn: "动画监督"
+        jp: "アニメーション監督"
+        categories:
+          - *GAME_ANIMATION
+      1020:
+        en: ""
+        cn: "动画剧本"
+        jp: "アニメーション脚本"
+        categories:
+          - *GAME_ANIMATION
+      1018:
+        en: ""
+        cn: "制作总指挥"
+        jp: ""
+        categories:
+          - *GAME_DIRECTOR
+      1019:
+        en: "QC"
+        cn: "QC"
+        jp: ""
+        categories:
+          - *GAME_PRODUCTION
+      1007:
+        en: ""
+        cn: "关卡设计"
+        jp: ""
+        categories:
+          - *GAME_DESIGN
+      1009:
+        en: "Theme Song Composition"
+        cn: "主题歌作曲"
+        jp: ""
+        categories:
+          - *GAME_MUSIC
+      1010:
+        en: "Theme Song Lyrics"
+        cn: "主题歌作词"
+        jp: ""
+        categories:
+          - *GAME_MUSIC
+      1011:
+        en: "Theme Song Performance"
+        cn: "主题歌演出"
+        jp: ""
+        categories:
+          - *GAME_MUSIC
+      1012:
+        en: "Inserted Song Performance"
+        cn: "插入歌演出"
+        jp: ""
+        categories:
+          - *GAME_MUSIC
+      1022:
+        en: ""
+        cn: "协力"
+        jp: "協力"
+        categories:
+          - *GAME_ASSISTANT
+
+    book: &BOOK_STAFFS
+      2007:
+        en: "Original Creator/Original Work"
+        cn: "原作"
+        jp: ""
+      2001:
+        en: ""
+        cn: "作者"
+        jp: ""
+      2002:
+        en: ""
+        cn: "作画"
+        jp: ""
+      2003:
+        en: ""
+        cn: "插图"
+        jp: "イラスト"
+      2010:
+        en: ""
+        cn: "脚本"
+        jp: "シナリオ"
+      2004:
+        en: ""
+        cn: "出版社"
+        jp: ""
+      2005:
+        en: ""
+        cn: "连载杂志"
+        jp: "掲載誌"
+      2006:
+        en: ""
+        cn: "译者"
+        jp: ""
+      2008:
+        en: "Guest"
+        cn: "客串"
+        jp: "ゲスト"
+      2009:
+        en: "Original Character Design"
+        cn: "人物原案"
+        jp: "キャラクター原案"
+      2011:
+        en: "Label"
+        cn: "书系"
+        jp: ""
+      2012:
+        en: ""
+        cn: "出品方"
+        jp: ""
+      2013:
+        en: "Brand"
+        cn: "图书品牌"
+        jp: "ブランド"
+
+    music: &MUSIC_STAFFS
+      3001:
+        en: "Artist"
+        cn: "艺术家"
+        jp: ""
+      3002:
+        en: "Producer"
+        cn: "制作人"
+        jp: ""
+      3004:
+        en: "Label"
+        cn: "厂牌"
+        jp: "レーベル"
+      3003:
+        en: "Composer"
+        cn: "作曲"
+        jp: ""
+      3006:
+        en: "Lyric"
+        cn: "作词"
+        jp: ""
+      3008:
+        en: "Arrange"
+        cn: "编曲"
+        jp: ""
+      3014:
+        en: "Instrument"
+        cn: "乐器"
+        jp: ""
+      3015:
+        en: "Vocal"
+        cn: "声乐"
+        jp: ""
+      3007:
+        en: "Recording"
+        cn: "录音"
+        jp: ""
+      3013:
+        en: "Mixing"
+        cn: "混音"
+        jp: ""
+      3012:
+        en: "Mastering"
+        cn: "母带制作"
+        jp: ""
+      3009:
+        en: "Illustrator"
+        cn: "插图"
+        jp: ""
+      3005:
+        en: "Original Creator/Original Work"
+        cn: "原作"
+        jp: ""
+      3010:
+        en: "Scenario"
+        cn: "脚本"
+        jp: "シナリオ"
+      3011:
+        en: "O.P."
+        cn: "出版方"
+        jp: "音楽出版社"
+
+    real: &REAL_STAFFS
+      4001:
+        en: "Creator"
+        cn: "原作"
+        jp: ""
+      4002:
+        en: "Director"
+        cn: "导演"
+        jp: ""
+      4003:
+        en: "Writer"
+        cn: "编剧"
+        jp: ""
+      4016:
+        en: "Actor"
+        cn: "主演"
+        jp: ""
+      4017:
+        en: "Supporting Actor"
+        cn: "配角"
+        jp: ""
+      4013:
+        en: "Creative Director"
+        cn: "创意总监"
+        jp: ""
+      4004:
+        en: "Composer"
+        cn: "音乐"
+        jp: ""
+      4005:
+        en: "Executive Producer"
+        cn: "执行制片人"
+        jp: "製作総指揮"
+      4006:
+        en: "Co-Executive Producer"
+        cn: "共同执行制作"
+        jp: ""
+      4007:
+        en: "Producer"
+        cn: "制片人/制作人"
+        jp: "プロデューサー"
+      4008:
+        en: "Supervising Producer"
+        cn: "监制"
+        jp: ""
+      4009:
+        en: "Consulting Producer"
+        cn: "副制作人/制作顾问"
+        jp: ""
+      4010:
+        en: "Story"
+        cn: "故事"
+        jp: ""
+      4011:
+        en: "Story Editor"
+        cn: "编审"
+        jp: ""
+      4012:
+        en: "Editor"
+        cn: "剪辑"
+        jp: ""
+      4014:
+        en: "Cinematography"
+        cn: "摄影"
+        jp: ""
+      4020:
+        en: "ADR Director"
+        cn: "配音导演"
+        jp: ""
+      4021:
+        en: "Recording"
+        cn: "录音"
+        jp: "録音"
+      4015:
+        en: "Theme Song Performance"
+        cn: "主题歌演出"
+        jp: ""
+      4022:
+        en: "Poster"
+        cn: "海报"
+        jp: ""
+      4018:
+        en: "Production"
+        cn: "制作"
+        jp: "製作 製作スタジオ"
+      4019:
+        en: "Present"
+        cn: "出品"
+        jp: "配給"
+
+staffs:
+  *TYPE_ANIME : *ANIME_STAFFS
+  *TYPE_GAME : *GAME_STAFFS
+  *TYPE_BOOK : *BOOK_STAFFS
+  *TYPE_MUSIC : *MUSIC_STAFFS
+  *TYPE_REAL : *REAL_STAFFS

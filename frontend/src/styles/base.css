@@ -1,0 +1,308 @@
+/**
+ * base.css — 纯基础：重置、CSS 变量、容器透明
+ *
+ * 只放"不管哪个主题都需要"的基础规则：
+ *   - 字体平滑
+ *   - body / .v-application 透明（让背景层透出）
+ *   - Vuetify surface 变量（半透明基值，主题文件可覆盖）
+ *   - 中间层容器透明
+ *   - 组件内部透明（卡片/弹窗内的子组件）
+ *   - 表单控件间距
+ *   - 功能性布局类
+ *
+ * 不放任何视觉风格（颜色/背景/模糊/边框/阴影/滚动条样式），
+ * 那些由 tokens.css（设计令牌）+ visual.css（共享视觉规则）统一处理，
+ * 主题专属效果由 glass-acg.scss / glass-themes.css / theme-classic.css 处理。
+ */
+
+/* ============================================================
+ * 1. 全局重置
+ * ============================================================ */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* 统一辅助文字透明度：与主文字（0.87）一致，避免副文字过暗 */
+  --v-medium-emphasis-opacity: 0.87;
+  --v-disabled-opacity: 0.5;
+}
+
+body {
+  background: transparent !important;
+}
+
+/* 背景/遮罩层基础结构 —— 主题文件负责填充视觉内容（背景图、颜色） */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+body::before {
+  z-index: -2;
+}
+
+body::after {
+  z-index: -1;
+}
+
+.v-application {
+  background: transparent !important;
+}
+
+/* ============================================================
+ * 2. Vuetify surface 变量 — 半透明基值
+ * 主题文件可覆盖这些变量来改变全局底色
+ * ============================================================ */
+.v-theme--light {
+  --v-theme-surface: 255, 255, 255;
+  --v-theme-surface-light: 255, 255, 255;
+  --v-theme-surface-variant: 245, 245, 245;
+}
+
+.v-theme--dark {
+  --v-theme-surface: 30, 30, 30;
+  --v-theme-surface-light: 30, 30, 30;
+  --v-theme-surface-variant: 44, 44, 44;
+}
+
+/* ============================================================
+ * 3. 中间层容器透明
+ * ============================================================ */
+.v-main,
+.v-container,
+.v-row,
+.v-col,
+.v-window,
+.v-window-item,
+.v-slide-group,
+.v-slide-group__container,
+.v-slide-group__wrapper,
+.v-slide-group__content {
+  background: transparent !important;
+}
+
+/* ============================================================
+ * 4. 组件内部透明
+ * 卡片/弹窗内的子组件必须透明，否则实色会盖住玻璃效果
+ * ============================================================ */
+
+/* 卡片内部 */
+.v-card-text,
+.v-card-title,
+.v-card-actions,
+.v-card-item {
+  background: transparent !important;
+}
+
+.v-card .v-card-text,
+.v-card .v-card-item,
+.v-card .v-card-title,
+.v-card .v-card-actions,
+.v-card .v-card-text .v-expansion-panel-title,
+.v-card .v-card-text .v-expansion-panel-text,
+.v-card .v-card-text .v-list,
+.v-card .v-card-text .v-list-item,
+.v-card .v-card-text .v-sheet {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.v-card .v-card-text .v-expansion-panel {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* 弹窗内部 */
+.v-dialog .v-card .v-card-text,
+.v-dialog .v-card .v-card-item,
+.v-dialog .v-card .v-card-title,
+.v-dialog .v-card .v-card-actions,
+.v-dialog .v-card .v-card-text .v-expansion-panel-title,
+.v-dialog .v-card .v-card-text .v-expansion-panel-text,
+.v-dialog .v-card .v-card-text .v-list,
+.v-dialog .v-card .v-card-text .v-list-item {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.v-dialog .v-card .v-card-text .v-expansion-panel {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* 折叠面板内容/标题 */
+.v-expansion-panel-text {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.v-expansion-panel-title {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* 列表 */
+.v-list {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.v-list-item--variant-elevated,
+.v-list-item--variant-flat {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.v-navigation-drawer .v-list {
+  background: transparent !important;
+}
+
+/* ============================================================
+ * 5. 卡片工具类 — 纯结构
+ * ============================================================ */
+.glass-card {
+  --glass-radius: var(--am-surface-radius, 24px);
+  overflow: hidden;
+}
+
+/* ============================================================
+ * 6. 表单控件间距 — 纯结构
+ * ============================================================ */
+.v-card-text .v-text-field,
+.v-card-text .v-select,
+.v-card-text .v-textarea,
+.v-card-text .v-combobox,
+.v-card-text .v-autocomplete {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.v-card-text .v-input--persistent-hint {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.v-switch .v-input__control {
+  margin-inline: 8px;
+}
+
+.v-switch.v-input--density-compact {
+  margin-top: -2px;
+}
+
+.v-card-title + .v-card-text {
+  padding-top: 12px;
+}
+
+.v-window-item > .v-form > :first-child,
+.v-window-item > :first-child {
+  padding-top: 8px;
+}
+
+/* ============================================================
+ * 7. 按钮内图标与文字垂直居中 — 纯结构
+ * ============================================================ */
+.v-btn {
+  align-items: center !important;
+}
+
+.v-btn .v-btn__prepend,
+.v-btn .v-btn__append {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+}
+
+.v-btn .v-btn__content {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+}
+
+.v-btn .v-btn__prepend .v-icon,
+.v-btn .v-btn__append .v-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* v-btn--slim 模式下，mdi 字体字符在 box 内 baseline 对齐导致视觉偏上，
+   与文字字身不对齐。下移 1px 让图标视觉与文字字身居中对齐。 */
+.v-btn--slim .v-btn__prepend .v-icon,
+.v-btn--slim .v-btn__append .v-icon {
+  transform: translateY(1px);
+}
+
+.v-list-item .v-list-item__prepend,
+.v-list-item .v-list-item__append {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+}
+
+.v-chip .v-chip__prepend,
+.v-chip .v-chip__append {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+}
+
+.v-chip .v-chip__content {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+}
+
+.v-alert .v-alert__prepend {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+}
+
+/* ═══ 海报角标（poster-badge）═══
+   叠在海报图上的状态角标（已入库/BGM/类型等）。
+   独立样式，全部属性 !important，不受任何主题（含 ACG 玻璃）规则影响，
+   保持实心语义色 + 白字，保证在任意图像上的可读性。 */
+.poster-badge.v-chip {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-image: none !important;
+  background-color: rgb(var(--v-theme-grey)) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: none !important;
+  opacity: 0.92;
+}
+
+.poster-badge.v-chip.v-chip--variant-flat.bg-success,
+.poster-badge.v-chip.v-chip--variant-flat.v-chip--color-success {
+  background-color: rgb(var(--v-theme-success)) !important;
+}
+
+.poster-badge.v-chip.v-chip--variant-flat.bg-error,
+.poster-badge.v-chip.v-chip--variant-flat.v-chip--color-error {
+  background-color: rgb(var(--v-theme-error)) !important;
+}
+
+.poster-badge.v-chip.v-chip--variant-flat.bg-info,
+.poster-badge.v-chip.v-chip--variant-flat.v-chip--color-info {
+  background-color: rgb(var(--v-theme-info)) !important;
+}
+
+.poster-badge.v-chip.v-chip--variant-flat.bg-primary,
+.poster-badge.v-chip.v-chip--variant-flat.v-chip--color-primary {
+  background-color: rgb(var(--v-theme-primary)) !important;
+}
+
+.poster-badge.v-chip.v-chip--variant-flat.bg-pink,
+.poster-badge.v-chip.v-chip--variant-flat.v-chip--color-pink {
+  background-color: #E91E63 !important;
+}
+
+.poster-badge.v-chip .v-chip__content,
+.poster-badge.v-chip .v-icon {
+  color: #fff !important;
+  text-shadow: none !important;
+}

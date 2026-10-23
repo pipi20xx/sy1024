@@ -1,0 +1,79 @@
+
+
+/* ============================================================
+* 布局 — DefaultLayout
+* ============================================================ */
+
+.logo-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 12px;
+}
+
+.logo-header--rail {
+  flex-direction: column;
+  padding: 12px 8px;
+  gap: 6px;
+}
+
+.logo-text {
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.sidebar-version {
+  font-size: 10px;
+  opacity: 0.4;
+  user-select: none;
+  margin-top: 2px;
+}
+
+/* ============================================================
+ * 表单控件等高 — .control-row
+ * ============================================================ */
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.control-row .v-btn--size-small.v-btn--density-default:not(.v-btn--icon),
+.control-row .v-btn--size-default.v-btn--density-default:not(.v-btn--icon) {
+  height: 40px !important;
+}
+
+.control-row .v-btn--icon.v-btn--size-small.v-btn--density-default,
+.control-row .v-btn--icon.v-btn--size-default.v-btn--density-default {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+/* :has() 自动检测 */
+.d-flex:not(.flex-column):not(.flex-column-reverse):has(.v-field, .v-switch, .v-checkbox, .v-radio)
+  .v-btn--size-small.v-btn--density-default:not(.v-btn--icon) {
+  height: 40px !important;
+}
+
+.d-flex:not(.flex-column):not(.flex-column-reverse):has(.v-field, .v-switch, .v-checkbox, .v-radio)
+  .v-btn--size-default.v-btn--density-default:not(.v-btn--icon) {
+  height: 40px !important;
+}
+
+/* switch / checkbox / radio 对齐 */
+.v-switch .v-input__control,
+.v-checkbox .v-input__control,
+.v-radio .v-input__control {
+  align-items: center;
+}
+
+/* ============================================================
+ * 功能性
+ * ============================================================ */
+
+.v-tab .v-btn__content {
+  overflow: visible !important;
+}

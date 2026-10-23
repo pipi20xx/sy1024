@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Favicon: 高分辨率 PNG 优先；SVG 作为现代浏览器增强 -->
+    <link rel="icon" type="image/png" sizes="512x512" href="/pwa-512x512.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/pwa-192x192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="alternate icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- PWA / 移动端 Meta 标签 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+
+    <!-- iOS Safari PWA 支持 -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SYTMDB" />
+
+    <!-- 主题色 (浏览器地址栏 / PWA 启动屏) -->
+    <meta name="theme-color" content="#a855f7" />
+
+    <!-- iOS 桌面图标 -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png" />
+
+    <!-- MDI 图标字体已改为 npm 包本地打包（src/main.ts 引入 @mdi/font），
+         不再从 jsdelivr CDN 加载，避免慢网络下字体回退导致图标闪烁 -->
+
+    <!-- 防主题闪烁：Vue 挂载前根据持久化主题给 <html> 打上主题 class。
+         逻辑需与 useThemeStore.readStoredAppTheme / App.vue 的 applyDarkClass 保持一致。 -->
+    <script>
+      ;(function () {
+        try {
+          var theme = localStorage.getItem('app_theme')
+          if (!theme) {
+            // 旧版双 key（glass_theme + theme_mode）迁移，ACG 恒为暗色
+            var legacyStyle = localStorage.getItem('glass_theme')
+            var dark = legacyStyle === 'acg' ? true : localStorage.getItem('theme_mode') !== 'light'
+            theme = legacyStyle === 'acg'
+              ? 'acg'
+              : (legacyStyle === 'liquid' ? 'liquid' : 'classic') + (dark ? '-dark' : '-light')
+          }
+          var styles = {
+            'classic-light': 'classic',
+            'classic-dark': 'classic',
+            'liquid-light': 'liquid',
+            'liquid-dark': 'liquid',
+            acg: 'acg',
+          }
+          var style = styles[theme]
+          if (!style) return
+          var root = document.documentElement
+          root.classList.add('glass-theme-' + style)
+          root.classList.add(
+            theme === 'classic-light' || theme === 'liquid-light' ? 'glass-light' : 'glass-dark',
+          )
+        } catch (e) {
+          /* localStorage 不可用时保持默认主题 */
+        }
+      })()
+    </script>
+
+    <title>SYTMDB-Manager</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

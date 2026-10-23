@@ -1,0 +1,169 @@
+<h3>标签规则匹配说明</h3>
+<p>标签规则用于根据媒体项目的元数据（<span class="explanation-keyword">国家/地区</span>、<span class="explanation-keyword">类型</span>、<span class="explanation-keyword">年份</span>）自动生成标签。</p>
+
+<h4>数据来源：</h4>
+<p>标签规则使用的元数据直接从项目的本地JSON文件中读取：</p>
+<ul>
+    <li>TV剧集：从 <span class="explanation-keyword">series.json</span> 读取</li>
+    <li>电影：从 <span class="explanation-keyword">all.json</span> 读取</li>
+</ul>
+<p>这些JSON文件包含从TMDB API获取的完整元数据，包括制作国家、类型、首播日期/上映日期等信息。</p>
+
+<h4>匹配模式详解：</h4>
+<div style="margin-bottom: 12px;">
+    <p>
+        <span class="explanation-keyword">模糊匹配 (默认)</span>：
+        当规则中定义了任何条件（国家/地区、类型、年份）时，媒体项目必须<span class="explanation-keyword">满足所有</span>定义的条件，该规则才匹配。
+    </p>
+    <div style="margin-left: 20px;">
+        <p>例如：规则定义了“国家：<span class="explanation-keyword">美国</span>”。</p>
+        <p style="margin-left: 20px;">媒体有“国家：<span class="explanation-keyword">美国</span>，英国”，则 <span class="explanation-positive">匹配</span>（媒体包含规则定义的国家）。</p>
+        <p style="margin-left: 20px;">媒体有“国家：英国”，则 <span class="explanation-negative">不匹配</span>（媒体不包含规则定义的国家）。</p>
+
+        <p>例如：规则定义了“类型：<span class="explanation-keyword">动画</span>”。</p>
+        <p style="margin-left: 20px;">媒体有“类型：<span class="explanation-keyword">动画</span>，悬疑”，则 <span class="explanation-positive">匹配</span>（媒体包含规则定义的类型）。</p>
+        <p style="margin-left: 20px;">媒体有“类型：剧情”，则 <span class="explanation-negative">不匹配</span>（媒体不包含规则定义的类型）。</p>
+
+        <p>例如：规则定义了“年份：<span class="explanation-keyword">2020</span>”。</p>
+        <p style="margin-left: 20px;">媒体的年份是“<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（媒体年份与规则年份一致）。</p>
+        <p style="margin-left: 20px;">媒体的年份是“2021”，则 <span class="explanation-negative">不匹配</span>（媒体年份与规则年份不一致）。</p>
+        
+        <p><span class="explanation-keyword">组合案例（模糊匹配）</span>：</p>
+        <p style="margin-left: 20px;">例如：规则定义：“国家：<span class="explanation-keyword">美国</span>，年份：<span class="explanation-keyword">2020</span>”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：剧情，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（国家和年份条件都满足）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：英国，类型：剧情，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-negative">不匹配</span>（国家条件不满足）。</p>
+
+        <p style="margin-left: 20px;">例如：规则定义：“类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（类型和年份条件都满足）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：剧情，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-negative">不匹配</span>（类型条件不满足）。</p>
+
+        <p style="margin-left: 20px;">例如：规则定义：“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（所有定义的国家、类型和年份条件都满足）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：英国，类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-negative">不匹配</span>（国家条件不满足）。</p>
+    </div>
+</div>
+
+<div style="margin-bottom: 12px;">
+    <p>
+        <span class="explanation-keyword">严格匹配 (勾选“严格匹配”复选框)</span>：
+        如果规则中定义了任何条件，则媒体项目必须<span class="explanation-keyword">完全一致地满足所有</span>定义的条件，才能匹配。
+    </p>
+    <div style="margin-left: 20px;">
+        <p>例如：规则定义了“国家：<span class="explanation-keyword">美国</span>”。</p>
+        <p style="margin-left: 20px;">媒体有“国家：<span class="explanation-keyword">美国</span>”，则 <span class="explanation-positive">匹配</span>（媒体国家与规则国家完全一致）。</p>
+        <p style="margin-left: 20px;">媒体有“国家：<span class="explanation-keyword">美国</span>，英国”，则 <span class="explanation-negative">不匹配</span>（媒体多了一个国家）。</p>
+
+        <p>例如：规则定义了“国家：<span class="explanation-keyword">美国</span>，<span class="explanation-keyword">英国</span>”。</p>
+        <p style="margin-left: 20px;">媒体有“国家：<span class="explanation-keyword">美国</span>，<span class="explanation-keyword">英国</span>”，则 <span class="explanation-positive">匹配</span>（媒体国家与规则国家完全一致）。</p>
+        <p style="margin-left: 20px;">媒体有“国家：<span class="explanation-keyword">美国</span>”，则 <span class="explanation-negative">不匹配</span>（媒体少了一个国家）。</p>
+
+        <p>例如：规则定义了“类型：<span class="explanation-keyword">动画</span>”。</p>
+        <p style="margin-left: 20px;">媒体有“类型：<span class="explanation-keyword">动画</span>”，则 <span class="explanation-positive">匹配</span>（媒体类型与规则类型完全一致）。</p>
+        <p style="margin-left: 20px;">媒体有“类型：<span class="explanation-keyword">动画</span>，悬疑”，则 <span class="explanation-negative">不匹配</span>（媒体多了一个类型）。</p>
+
+        <p>例如：规则定义了“类型：<span class="explanation-keyword">动画</span>，<span class="explanation-keyword">悬疑</span>”。</p>
+        <p style="margin-left: 20px;">媒体有“类型：<span class="explanation-keyword">动画</span>，<span class="explanation-keyword">悬疑</span>”，则 <span class="explanation-positive">匹配</span>（媒体类型与规则类型完全一致）。</p>
+        <p style="margin-left: 20px;">媒体有“类型：<span class="explanation-keyword">动画</span>”，则 <span class="explanation-negative">不匹配</span>（媒体少了一个类型）。</p>
+
+        <p>例如：规则定义了“年份：<span class="explanation-keyword">2020</span>”。</p>
+        <p style="margin-left: 20px;">媒体的年份是“<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（媒体年份与规则年份一致）。</p>
+        <p style="margin-left: 20px;">媒体的年份是“2021”，则 <span class="explanation-negative">不匹配</span>（媒体年份与规则年份不一致）。</p>
+        
+        <p><span class="explanation-keyword">组合案例（严格匹配）</span>：</p>
+        <p style="margin-left: 20px;">例如：规则定义：“国家：<span class="explanation-keyword">美国</span>，年份：<span class="explanation-keyword">2020</span>”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（国家和年份条件都严格满足）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，年份：2021”，则 <span class="explanation-negative">不匹配</span>（年份不一致）。</p>
+
+        <p style="margin-left: 20px;">例如：规则定义：“类型：<span class="explanation-keyword">剧情</span>，年份：<span class="explanation-keyword">2022</span>”。</p>
+        <p style="margin-left: 40px;">媒体有“类型：<span class="explanation-keyword">剧情</span>，年份：<span class="explanation-keyword">2022</span>”，则 <span class="explanation-positive">匹配</span>（类型和年份条件都严格满足）。</p>
+        <p style="margin-left: 40px;">媒体有“类型：剧情，年份：2021”，则 <span class="explanation-negative">不匹配</span>（年份不一致）。</p>
+
+        <p style="margin-left: 20px;">例如：规则定义：“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">剧情</span>，年份：<span class="explanation-keyword">2022</span>”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">剧情</span>，年份：<span class="explanation-keyword">2022</span>”，则 <span class="explanation-positive">匹配</span>（所有定义的国家、类型和年份条件都完全满足）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：动画，年份：<span class="explanation-keyword">2022</span>”，则 <span class="explanation-negative">不匹配</span>（类型不一致）。</p>
+
+        <p style="margin-left: 20px;">例如：规则定义：“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>”，勾选“严格匹配”和“负向匹配”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的严格匹配条件，媒体多了一个年份）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>”，则 <span class="explanation-negative">不匹配</span>（媒体满足规则的严格匹配条件）。</p>
+    </div>
+</div>
+
+<div style="margin-bottom: 12px;">
+    <p>
+        <span class="explanation-keyword">负向匹配 (勾选“负向匹配”复选框)</span>：
+        当勾选此选项后，规则的条件将反转。即当媒体<span class="explanation-keyword">不符合</span>规则条件时，该规则才会被视为匹配。
+    </p>
+    <p class="explanation-note" style="margin-left: 20px;"><span class="explanation-keyword">重要提示：</span> 负向匹配是针对<span class="explanation-keyword">整个规则的最终匹配结果</span>进行反转，而不是单独反转每个条件。规则会先根据“模糊匹配”或“严格匹配”逻辑以及所有定义的条件（国家/地区、类型、年份）计算出一个初步的匹配结果，然后如果勾选了“负向匹配”，这个初步的匹配结果才会被反转。</p>
+    <div style="margin-left: 20px;">
+        <p>例如：规则定义了“国家：<span class="explanation-keyword">美国</span>”，并勾选“负向匹配”。</p>
+        <p style="margin-left: 20px;">媒体有“国家：英国”，则 <span class="explanation-positive">匹配</span>（媒体不包含规则定义的国家）。</p>
+        <p style="margin-left: 20px;">媒体有“国家：<span class="explanation-keyword">美国</span>”，则 <span class="explanation-negative">不匹配</span>（媒体包含规则定义的国家）。</p>
+
+        <p>例如：规则定义了“国家：<span class="explanation-keyword">美国</span>，<span class="explanation-keyword">英国</span>”，并勾选“负向匹配”。</p>
+        <p style="margin-left: 20px;">媒体有“国家：<span class="explanation-keyword">美国</span>”，则 <span class="explanation-positive">匹配</span>（媒体不完全包含规则定义的国家）。</p>
+        <p style="margin-left: 20px;">媒体有“国家：<span class="explanation-keyword">美国</span>，<span class="explanation-keyword">英国</span>”，则 <span class="explanation-negative">不匹配</span>（媒体完全包含规则定义的国家）。</p>
+
+        <p>例如：规则定义了“类型：<span class="explanation-keyword">动画</span>”，并勾选“负向匹配”。</p>
+        <p style="margin-left: 20px;">媒体有“类型：剧情”，则 <span class="explanation-positive">匹配</span>（媒体不包含规则定义的类型）。</p>
+        <p style="margin-left: 20px;">媒体有“类型：<span class="explanation-keyword">动画</span>”，则 <span class="explanation-negative">不匹配</span>（媒体包含规则定义的类型）。</p>
+
+        <p>例如：规则定义了“类型：<span class="explanation-keyword">动画</span>，<span class="explanation-keyword">悬疑</span>”，并勾选“负向匹配”。</p>
+        <p style="margin-left: 20px;">媒体有“类型：<span class="explanation-keyword">动画</span>”，则 <span class="explanation-positive">匹配</span>（媒体不完全包含规则定义的类型）。</p>
+        <p style="margin-left: 20px;">媒体有“类型：<span class="explanation-keyword">动画</span>，<span class="explanation-keyword">悬疑</span>”，则 <span class="explanation-negative">不匹配</span>（媒体完全包含规则定义的类型）。</p>
+
+        <p>例如：规则定义了“年份：<span class="explanation-keyword">2020</span>”，并勾选“负向匹配”。</p>
+        <p style="margin-left: 20px;">媒体的年份是“2021”，则 <span class="explanation-positive">匹配</span>（媒体年份与规则年份不一致）。</p>
+        <p style="margin-left: 20px;">媒体的年份是“<span class="explanation-keyword">2020</span>”，则 <span class="explanation-negative">不匹配</span>（媒体年份与规则年份一致）。</p>
+        
+        <p><span class="explanation-keyword">组合案例（负向匹配 + 模糊匹配）</span>：</p>
+        <p style="margin-left: 20px;">例如：规则定义：“国家：<span class="explanation-keyword">美国</span>，年份：<span class="explanation-keyword">2020</span>”，并勾选“负向匹配”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：英国，年份：2021”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的模糊匹配条件）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，年份：2021”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的模糊匹配条件，年份不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：英国，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的模糊匹配条件，国家不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-negative">不匹配</span>（媒体满足规则的模糊匹配条件）。</p>
+
+        <p style="margin-left: 20px;">例如：规则定义：“类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”，并勾选“负向匹配”。</p>
+        <p style="margin-left: 40px;">媒体有“类型：剧情，年份：2021”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的模糊匹配条件）。</p>
+        <p style="margin-left: 40px;">媒体有“类型：<span class="explanation-keyword">动画</span>，年份：2021”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的模糊匹配条件，年份不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“类型：剧情，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的模糊匹配条件，类型不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-negative">不匹配</span>（媒体满足规则的模糊匹配条件）。</p>
+
+        <p style="margin-left: 20px;">例如：规则定义：“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”，并勾选“负向匹配”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：英国，类型：剧情，年份：2021”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的模糊匹配条件）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：剧情，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的模糊匹配条件，类型不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-negative">不匹配</span>（媒体满足规则的模糊匹配条件）。</p>
+    </div>
+</div>
+
+<div style="margin-bottom: 12px;">
+    <p><span class="explanation-keyword">组合案例（负向匹配 + 严格匹配）</span>：</p>
+    <div style="margin-left: 20px;">
+        <p>例如：规则定义：“国家：<span class="explanation-keyword">美国</span>，年份：<span class="explanation-keyword">2020</span>”，勾选“严格匹配”和“负向匹配”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：英国，年份：2021”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的严格匹配条件）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，年份：2021”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的严格匹配条件，年份不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：英国，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的严格匹配条件，国家不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-negative">不匹配</span>（媒体满足规则的严格匹配条件）。</p>
+
+        <p style="margin-left: 20px;">例如：规则定义：“类型：<span class="explanation-keyword">剧情</span>，年份：<span class="explanation-keyword">2022</span>”，勾选“严格匹配”和“负向匹配”。</p>
+        <p style="margin-left: 40px;">媒体有“类型：动画，年份：2021”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的严格匹配条件）。</p>
+        <p style="margin-left: 40px;">媒体有“类型：<span class="explanation-keyword">剧情</span>，年份：2021”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的严格匹配条件，年份不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“类型：动画，年份：<span class="explanation-keyword">2022</span>”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的严格匹配条件，类型不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“类型：<span class="explanation-keyword">剧情</span>，年份：<span class="explanation-keyword">2022</span>”，则 <span class="explanation-negative">不匹配</span>（媒体满足规则的严格匹配条件）。</p>
+
+        <p style="margin-left: 20px;">例如：规则定义：“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">剧情</span>，年份：<span class="explanation-keyword">2022</span>”，勾选“严格匹配”和“负向匹配”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：动画，年份：<span class="explanation-keyword">2022</span>”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的严格匹配条件，类型不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">剧情</span>，年份：2021”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的严格匹配条件，年份不匹配）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">剧情</span>，年份：<span class="explanation-keyword">2022</span>”，则 <span class="explanation-negative">不匹配</span>（媒体满足规则的严格匹配条件）。</p>
+
+        <p style="margin-left: 20px;">例如：规则定义：“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>”，勾选“严格匹配”和“负向匹配”。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>，年份：<span class="explanation-keyword">2020</span>”，则 <span class="explanation-positive">匹配</span>（媒体不满足规则的严格匹配条件，媒体多了一个年份）。</p>
+        <p style="margin-left: 40px;">媒体有“国家：<span class="explanation-keyword">美国</span>，类型：<span class="explanation-keyword">动画</span>”，则 <span class="explanation-negative">不匹配</span>（媒体满足规则的严格匹配条件）。</p>
+    </div>
+</div>
+
+<h4>年份规则详解：</h4>
+<div style="margin-bottom: 12px;">
+    <p>支持单个年份，例如 <span class="explanation-keyword">2020</span>。</p>
+    <p>支持年份范围，例如 <span class="explanation-keyword">2000-2010</span>（包含起始和结束年份）。</p>
+    <p>支持逗号分隔的年份列表，例如 <span class="explanation-keyword">2000,2005,2010</span>。</p>
+</div>

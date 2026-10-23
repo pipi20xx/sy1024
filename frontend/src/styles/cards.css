@@ -1,0 +1,73 @@
+
+
+/* ── 圆角穿透图片卡（DetailsSeasons / DetailsImages 共用）── */
+.image-card {
+  overflow: hidden;
+}
+
+.image-card__poster {
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.image-card__img {
+  border-radius: inherit;
+}
+
+/* Vuetify v-img 内部的 <img> 是 absolute 定位，需要继承圆角才能裁切 */
+.image-card__img .v-img__img {
+  border-radius: inherit;
+}
+
+/* ── 海报卡骨架（MediaCard / DetailsCastCrew 共用）──
+   纵向 flex 撑满 + 海报区自适应拉伸；圆角策略与信息区
+   内边距由各组件 scoped 补充（两者取值不同） */
+.poster-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.poster-card__wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.poster-card__img {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 2/3 宽高比由 Vuetify v-responsive sizer 承载 */
+.poster-card__img .v-responsive__sizer {
+  padding-bottom: 150% !important;
+}
+
+.poster-card__info {
+  flex: 0 0 auto;
+}
+
+/* ── 演员卡片网格 — DetailsCastCrew（海报卡骨架见上方 .poster-card） ── */
+.cast-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}@media (min-width: 600px) { .cast-card-grid { grid-template-columns: repeat(4, 1fr); } }@media (min-width: 960px) { .cast-card-grid { grid-template-columns: repeat(6, 1fr); } }@media (min-width: 1264px) { .cast-card-grid { grid-template-columns: repeat(8, 1fr); } }
+.log-line {
+  padding: 2px 4px;
+  border-radius: 2px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-height: 1.6;
+}
+.log-error {
+  color: rgb(var(--v-theme-error));
+  background: rgba(var(--v-theme-error), 0.06);
+}
+
+/* --- 光标手型 --- */
+.cursor-pointer { cursor: pointer; }
+
+

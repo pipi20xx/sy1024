@@ -1,0 +1,7 @@
+/**
+ * feedback.css — 反馈组件纯结构
+ *
+ * 此前定义的 .v-chip--size-x-small 尺寸规则已合并至
+ * visual.css §19（Chip Size），避免重复声明。
+ * 如需调整芯片尺寸，请统一在 visual.css 中修改。
+ */

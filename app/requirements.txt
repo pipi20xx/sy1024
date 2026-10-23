@@ -1,0 +1,24 @@
+fastapi
+uvicorn[standard]
+requests
+pydantic
+Pillow
+python-multipart
+httpx
+aiofiles
+sqlalchemy
+# sqlalchemy.ext.asyncio 运行必需；sqlalchemy 2.1 起不再自动安装
+greenlet
+aiosqlite
+asyncpg
+pytest
+pytest-asyncio
+numpy
+py7zr
+apscheduler
+passlib[bcrypt]
+python-jose[cryptography]
+pyotp
+qrcode
+openai
+watchdog

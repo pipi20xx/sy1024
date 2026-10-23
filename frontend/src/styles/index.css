@@ -1,0 +1,102 @@
+/**
+ * index.css — 设计系统入口
+ *
+ * 四层架构：
+ *   ┌─────────────────────────────────────────────────────────────┐
+ *   │ 第 1 层  基础 / 结构                                       │
+ *   │   base.css        — 重置、容器透明、Vuetify 变量           │
+ *   │   components.css  — 组件布局、间距                         │
+ *   │   buttons.css     — 按钮圆角、按下态                       │
+ *   │   feedback.css    — 芯片尺寸                               │
+ *   │   transitions.css — 全局过渡                               │
+ *   │   pages.css       — 页面布局、表单等高                      │
+ *   │   cards.css       — 卡片系统                               │
+ *   │   design-spec.css — 设计规范：间距、布局                   │
+ *   │   utilities.css   — 通用复用                               │
+ *   │   appearance-dialogs.css — 外观定制对话框公共骨架          │
+ *   │                                                           │
+ *   │ 第 2 层  设计令牌（Design Tokens）                         │
+ *   │   tokens.css      — CSS 变量：颜色/模糊/边框/阴影/圆角     │
+ *   │                                                           │
+ *   │ 第 3 层  共享视觉规则                                      │
+ *   │   visual.css       — 统一组件视觉：背景/模糊/边框/阴影     │
+ *   │                                                           │
+ *   │ 第 4 层  主题覆盖                                          │
+ *   │   glass-acg.scss     — ACG 玻璃主题统一（html.glass-theme-acg）│
+ *   │   glass-themes.css   — 液态玻璃（html.glass-theme-liquid） │
+ *   │   theme-classic.css  — 经典实色（html.glass-theme-classic）│
+ *   └─────────────────────────────────────────────────────────────┘
+ *
+ * 规则：
+ *   第 1 层 只放结构，不放颜色/背景/模糊/边框/阴影。
+ *   第 2 层 只放变量声明，不放选择器规则。
+ *   第 3 层 不带主题前缀，通过 CSS 变量级联自动适配。
+ *   第 4 层 只放主题特有规则，通过 html.glass-theme-xxx 前缀隔离。
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+ * 第 1 层 — 基础 / 结构
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* 1.1 基础：重置、CSS 变量、容器透明 */
+@import './base.css';
+
+/* 1.2 Vuetify 组件结构覆盖 */
+@import './components.css';
+
+/* 1.3 按钮结构 */
+@import './buttons.css';
+
+/* 1.4 反馈组件结构 */
+@import './feedback.css';
+
+/* 1.5 过渡动画 */
+@import './transitions.css';
+
+/* 1.6 页面级结构 */
+@import './pages.css';
+
+/* 1.8 卡片系统 */
+@import './cards.css';
+
+/* 1.9 设计规范结构 */
+@import './design-spec.css';
+
+/* 1.10 通用复用结构 */
+@import './utilities.css';
+
+/* 1.11 外观定制对话框公共骨架（6 个外观对话框共用） */
+@import './appearance-dialogs.css';
+
+/* ═══════════════════════════════════════════════════════════════
+ * 第 2 层 — 设计令牌（Design Tokens）
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* 2.1 CSS 变量：颜色/模糊/边框/阴影/圆角/过渡 */
+@import './tokens.css';
+
+/* ═══════════════════════════════════════════════════════════════
+ * 第 3 层 — 共享视觉规则
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* 3.1 统一组件视觉：背景/模糊/边框/阴影（引用令牌） */
+@import './visual.css';
+
+/* ═══════════════════════════════════════════════════════════════
+ * 第 4 层 — 主题覆盖
+ * ═══════════════════════════════════════════════════════════════ */
+
+/* 4.1 ACG 玻璃主题统一 — 材质 + 文字颜色/光晕（html.glass-theme-acg 激活）
+ *     材质：1:1 照搬 MoviePilot glass.scss，接管 background/backdrop-filter/border-color/box-shadow。
+ *     文字：ACG 专属文字颜色、光晕效果。
+ */
+@import '../glass/styles/glass-acg.scss';
+
+/* 4.2 液态玻璃主题视觉风格（html.glass-theme-liquid 激活） */
+@import '../glass/styles/glass-themes.css';
+
+/* 4.3 经典实色主题视觉风格（html.glass-theme-classic 激活） */
+@import './theme-classic.css';
+
+/* 4.4 sytmdb 专属页面样式补充（本仓库私有，移植体系之外的页面级类） */
+@import './sytmdb-pages.css';

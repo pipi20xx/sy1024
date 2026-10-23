@@ -1,0 +1,40 @@
+
+
+/* 筛选工具栏字段（搜索框以外的下拉筛选） */
+.filter-field {
+  max-width: 400px;
+  min-width: 200px;
+  flex-grow: 1;
+}
+
+/* 对话框 / 设置面板中的选项按钮组：
+   复位 Vuetify v-btn-group 默认边框与阴影，按钮平铺衔接 */
+.option-btn-group {
+  border: 0 !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+.option-btn-group .v-btn {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 小号按钮文字（工具栏密集按钮统一字号） */
+.btn-caption {
+  font-size: 0.8125rem;
+}
+
+.v-dialog .v-card-text .v-text-field,
+.v-dialog .v-card-text .v-select,
+.v-dialog .v-card-text .v-autocomplete,
+.v-dialog .v-card-text .v-combobox,
+.v-dialog .v-card-text .v-textarea {
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.v-dialog .v-card-text .v-row + .v-row {
+  margin-top: 4px;
+}

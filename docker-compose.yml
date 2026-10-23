@@ -1,0 +1,84 @@
+# docker-compose.yml
+#
+# 开发环境 — 前后端分离，各自热重载
+#
+# 启动：docker compose up -d
+# 停止：docker compose down
+#
+# 架构：
+#   ┌─────────────────┐     ┌──────────────────────┐
+#   │  frontend        │     │  backend              │
+#   │  Vite :5173      │────▶│  uvicorn :8000        │
+#   │  (HMR 热重载)    │ API │  (--reload 热重载)    │
+#   └─────────────────┘     └──────────────────────┘
+#
+# 访问地址：
+#   前端：http://localhost:5273（Vite Dev Server，改代码即时生效）
+#   后端：http://localhost:8121（API / Swagger，改代码自动重启）
+#
+# Vite 已将 /api、/static、/ws、/media-content 等请求代理到后端容器
+#
+# 排障：若前端报 vite 模块找不到等异常，多为 node_modules 卷里残留了旧版依赖，
+#       执行 docker compose down -v 清空依赖卷后重新 up 即可（会重新 npm install）
+
+services:
+  # ============================================================
+  # 后端 — 挂载源码，uvicorn --reload 热重载
+  # ============================================================
+  backend:
+    build: .
+    container_name: tmdb-editor-backend
+    # 跳过镜像的 gosu 降权 entrypoint，以 root 运行，避免挂载源码目录的权限问题
+    entrypoint: []
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --proxy-headers --forwarded-allow-ips "*"
+    ports:
+      - "8121:8000"
+    volumes:
+      # 挂载后端源码（修改后自动重载，不用重新构建）
+      - ./app:/app/app
+      - ./data:/data
+      # StrmAssistant 的 cache/override 根目录，按实际环境修改
+      #- /vol1/1000/NVME/元数据:/元数据
+    environment:
+      - DATA_PATH=/data
+      - TZ=Asia/Shanghai
+      - LOG_LEVEL=DEBUG
+      # 数据库配置（默认 SQLite；如需 PostgreSQL 取消注释以下配置）
+      # - DB_TYPE=postgresql
+      # - POSTGRES_HOST=postgres
+      # - POSTGRES_PORT=5432
+      # - POSTGRES_USER=postgres
+      # - POSTGRES_PASSWORD=postgres
+      # - POSTGRES_DB=sytmdb
+    restart: unless-stopped
+
+  # ============================================================
+  # 前端 — Vite Dev Server，HMR 热重载
+  # ============================================================
+  frontend:
+    # 与生产构建（Dockerfile 的 frontend-builder）保持一致的 Debian 基础镜像，
+    # 避免 sass-embedded 等 native 依赖在 alpine(musl) 下的兼容问题
+    image: node:22-slim
+    container_name: tmdb-editor-frontend
+    working_dir: /frontend
+    ports:
+      - "5273:5173"
+    volumes:
+      # 挂载前端源码（修改后 HMR 即时生效）
+      - ./frontend:/frontend
+      # 持久化 node_modules（避免每次重新 install）
+      - frontend_node_modules:/frontend/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true    # Docker 内文件监听需要
+      - VITE_PROXY_TARGET=http://backend:8000    # API 代理到后端容器
+    command: >
+      sh -c "
+        npm install &&
+        npm run dev -- --host 0.0.0.0 --port 5173
+      "
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  frontend_node_modules:

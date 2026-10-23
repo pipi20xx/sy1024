@@ -1,0 +1,25 @@
+// Vuetify SASS 变量覆盖 — 在 Vuetify 编译前加载
+// 参考: https://vuetifyjs.com/en/features/sass-variables/
+
+// 流动玻璃设计系统
+$color-pack: true;
+
+// 字体 — 避免 Inter/Roboto
+$body-font-family: 'SF Pro Display', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$heading-font-family: 'SF Pro Display', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+// 圆角 — Liquid Glass 使用超大圆角
+$border-radius-root: 16px;
+$rounded: (
+  0: 0,
+  'sm': 12px,
+  null: $border-radius-root,
+  'lg': 20px,
+  'xl': 24px,
+  'pill': 9999px,
+  'circle': 50%,
+);
+
+// 卡片 — Liquid Glass 边框
+$card-bordered-border-style: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
+

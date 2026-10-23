@@ -1,0 +1,1355 @@
+/**
+ * tokens.css — 设计令牌（Design Tokens）
+ *
+ * 三主题完全独立，互不混合：
+ *   :root                           → 仅跨主题中性值（过渡、尺寸等）
+ *   html.glass-theme-acg            → ACG 主题值（亮色 + 暗色 + body 级）
+ *   html.glass-theme-liquid         → 液态玻璃主题值（亮色 + 暗色 + body 级）
+ *   html.glass-theme-classic        → 经典实色主题值（亮色 + 暗色 + body 级）
+ *
+ * 规则：
+ *   1. :root 只放三主题完全相同的值（如过渡时长、滚动条宽度）
+ *   2. 每个主题在自己的 html.glass-theme-xxx 前缀下定义完整令牌
+ *   3. 主题内部用 .v-theme--light / .v-theme--dark 区分明暗
+ *   4. body 级令牌设在 html.glass-theme-xxx 上（body 是 .v-application 的父级）
+ *   5. 只放变量声明，不放选择器规则
+ */
+
+/* ============================================================
+ * 0. 中性令牌 — 三主题完全相同，不随主题变化
+ * ============================================================ */
+
+:root {
+  /* 过渡 */
+  --am-transition: all 0.3s ease;
+  --am-transition-fast: all 0.2s ease;
+
+  /* 背景暗色叠加基色（App.vue 背景渐变 / 玻璃背板共用） */
+  --am-dark-veil-rgb: 6, 10, 19;
+
+  /* 禁用态 */
+  --am-disabled-opacity: 0.5;
+
+  /* 滚动条尺寸 */
+  --am-scrollbar-width: 8px;
+  --am-scrollbar-radius: 4px;
+  --am-scrollbar-nav-width: 6px;
+  --am-scrollbar-nav-radius: 3px;
+
+  /* 列表项尺寸 */
+  --am-list-item-min-height: 38px;
+
+  /* 开关/滑块拇指（白色圆点，三主题统一） */
+  --am-switch-thumb-bg: #fff;
+  --am-switch-thumb-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  --am-slider-thumb-bg: #fff;
+
+  /* 卡片悬浮位移 */
+  --am-surface-hover-transform: translateY(-2px);
+
+  /* 折叠面板（引用 surface-radius，自动随主题） */
+  --am-panel-radius: var(--am-surface-radius);
+  --am-panel-shadow: none;
+
+  /* 标签页选中字重 */
+  --am-tab-active-weight: 600;
+
+  /* 芯片圆角 */
+  --am-chip-radius: 8px;
+
+  /* 输入框模糊（三主题都为 none） */
+  --am-field-blur: none;
+
+  /* 输入框阴影（默认 none，ACG/Liquid 可在主题块覆盖） */
+  --am-field-shadow: none;
+
+  /* 进度条光晕（亮色为 none，ACG 暗色在自己的区块覆盖） */
+  --am-progress-glow: none;
+
+  /* 代码块语法高亮色（跨主题统一，终端绿） */
+  --am-code-syntax-color: #7ec699;
+
+  /* 媒体卡片徽章 — 海报上的半透明深色底（跨主题统一） */
+  --am-badge-overlay-bg: rgba(0, 0, 0, 0.75);
+  --am-badge-accent: #4ecdc4;
+  --am-badge-warm: #ff6b6b;
+  --am-badge-rating-color: #ffd700;
+}
+
+/* 登录标题色（仅区分明暗，不区分主题） */
+:root {
+  --am-login-title-color: rgb(0, 0, 0);
+}
+.v-theme--dark {
+  --am-login-title-color: rgb(255, 255, 255);
+}
+
+/* ============================================================
+ * 1. ACG 主题 — 二次元壁纸 + 暗色毛玻璃
+ *    html.glass-theme-acg 激活（仅支持 dark 模式）
+ * ============================================================ */
+
+/* ── 1a. ACG 组件令牌（仅暗色） ── */
+html.glass-theme-acg {
+  /* Body */
+  --am-body-bg: transparent;
+  --am-body-before-bg: center / cover no-repeat;
+  /* body::before 不再直接加载壁纸图片 —— 壁纸统一由 useGlassWallpaper
+     通过后端代理 /api/appearance/wallpaper_proxy 加载，避免 CORS 问题和
+     随机壁纸 API 的缓存不一致。--am-wallpaper-source 仅存储源 URL 供 JS 读取。 */
+  --am-body-before-image: none;
+  --am-wallpaper-source: https://www.loliapi.com/acg/pc/;
+  --am-body-before-filter: blur(0px);
+  --am-body-before-transform: scale(1.02);
+  --am-body-after-bg: rgba(0, 0, 0, 0.24);
+  --am-body-after-display: "";
+
+  /* Surface — 纯透明，无背景色 */
+  --am-surface-bg: transparent;
+  --am-surface-blur: blur(1px) saturate(110%);
+  --am-surface-border: 1px solid rgba(255, 255, 255, 0.06);
+  --am-surface-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --am-surface-radius: 16px;
+  --am-surface-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  /* Overlay — 弹窗/菜单/下拉：薄玻璃 */
+  --am-overlay-bg: rgba(20, 20, 40, 0.2);
+  --am-overlay-blur: blur(8px) saturate(140%);
+  --am-overlay-border: 1px solid rgba(255, 255, 255, 0.08);
+  --am-overlay-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --am-overlay-radius: 20px;
+  --am-dialog-radius: 24px;
+  --am-menu-radius: 20px;
+
+  /* Nav */
+  --am-nav-bg: transparent;
+  --am-nav-blur: blur(1px) saturate(110%);
+  --am-nav-border: 1px solid rgba(255, 255, 255, 0.06);
+  --am-nav-shadow: none;
+
+  /* Field */
+  --am-field-bg: transparent;
+  --am-field-border: 1px solid rgba(255, 255, 255, 0.06);
+  --am-field-radius: 16px;
+  --am-field-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+  --am-field-focus-shadow:
+    0 0 0 3px rgba(var(--v-theme-primary), 0.2),
+    inset 0 1px 3px rgba(0, 0, 0, 0.04);
+  --am-field-outline-opacity: 0;
+  --am-field-focus-outline-color: rgb(var(--v-theme-primary));
+
+  /* Button */
+  --am-btn-bg: transparent;
+  --am-btn-blur: blur(1px) saturate(110%);
+  --am-btn-border: 1px solid rgba(255, 255, 255, 0.08);
+  --am-btn-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --am-btn-radius: 12px;
+  --am-btn-hover-bg: rgba(255, 255, 255, 0.12);
+  --am-btn-hover-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --am-btn-font-weight: 600;
+  --am-btn-text-color: rgb(255, 255, 255);
+  --am-btn-outlined-bg: transparent;
+  --am-btn-outlined-hover-bg: rgba(255, 255, 255, 0.08);
+
+  /* Tab */
+  --am-tab-bg: transparent;
+  --am-tab-blur: blur(1px) saturate(110%);
+  --am-tab-border: 1px solid rgba(255, 255, 255, 0.08);
+  --am-tab-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --am-tab-radius: 999px;
+  --am-tab-active-color: rgb(var(--v-theme-primary));
+  --am-tab-inactive-color: rgb(255, 255, 255);
+  --am-tab-hover-color: rgb(var(--v-theme-primary));
+  --am-tab-gap: 8px;
+
+  /* Chip */
+  --am-chip-blur: blur(1px) saturate(110%);
+  --am-chip-border: 1px solid rgba(255, 255, 255, 0.08);
+
+  /* Snackbar */
+  --am-snackbar-bg: rgba(20, 20, 40, 0.15);
+  --am-snackbar-blur: blur(3px) saturate(110%);
+  --am-snackbar-border: 1px solid rgba(255, 255, 255, 0.06);
+  --am-snackbar-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --am-snackbar-radius: 14px;
+  --am-snackbar-text: rgb(255, 255, 255);
+
+  /* Alert */
+  --am-alert-blur: blur(1px) saturate(110%);
+  --am-alert-border: 1px solid rgba(255, 255, 255, 0.08);
+
+  /* Scrim */
+  --am-scrim-blur: blur(4px);
+  --am-scrim-bg: rgba(0, 0, 0, 0.45);
+
+  /* Divider */
+  --am-divider-color: rgba(255, 255, 255, 0.06);
+
+  /* Text */
+  --am-label-color: rgb(255, 255, 255);
+  --am-label-focus-color: rgb(var(--v-theme-primary));
+  --am-input-text: rgb(255, 255, 255);
+  --am-dropdown-arrow: rgb(255, 255, 255);
+  --am-list-title: rgb(255, 255, 255);
+
+  /* Nav Active */
+  --am-nav-active-color: rgb(var(--v-theme-primary));
+  --am-nav-indicator-bg: transparent;
+  --am-nav-indicator-width: 2px;
+  --am-nav-indicator-radius: 0 2px 2px 0;
+
+  /* List Active */
+  --am-list-active-color: rgb(var(--v-theme-primary));
+
+  /* Scrollbar color */
+  --am-scrollbar-color: rgba(var(--am-primary-rgb, var(--v-theme-primary)), 0.25);
+  --am-scrollbar-hover: rgba(var(--am-primary-rgb, var(--v-theme-primary)), 0.4);
+
+  /* Login */
+  --am-login-bg: rgba(20, 20, 40, 0.1);
+  --am-login-blur: blur(3px) saturate(110%);
+  --am-login-border: 1px solid rgba(255, 255, 255, 0.06);
+  --am-login-shadow: 0 18px 42px -26px rgba(0, 0, 0, 0.7);
+  --am-login-radius: 24px;
+
+  /* Switch */
+  --am-switch-track-bg: rgba(150, 158, 172, 0.35);
+  --am-switch-track-active-bg: rgb(var(--v-theme-primary));
+
+  /* Checkbox / Radio */
+  --am-check-active-color: rgb(var(--v-theme-primary));
+  --am-check-inactive-color: rgba(150, 158, 172, 0.55);
+
+  /* Slider */
+  --am-slider-track-bg: rgba(255, 255, 255, 0.1);
+  --am-slider-fill-bg: linear-gradient(90deg, rgb(var(--v-theme-primary)), #4ecdc4);
+  --am-slider-thumb-shadow: 0 0 10px rgba(78, 205, 196, 0.4);
+
+  /* Progress */
+  --am-progress-fill-bg: linear-gradient(90deg, rgb(var(--v-theme-primary)), #4ecdc4);
+  --am-progress-circular-stroke: rgb(var(--v-theme-primary));
+  --am-progress-glow: 0 0 12px rgba(78, 205, 196, 0.4);
+
+  /* BtnToggle */
+  --am-btn-toggle-border: 1px solid rgba(255, 255, 255, 0.08);
+  --am-btn-toggle-radius: 16px;
+  --am-btn-toggle-active-bg: rgba(var(--v-theme-primary), 0.3);
+  --am-btn-toggle-active-color: rgb(var(--v-theme-primary));
+
+  /* Tooltip */
+  --am-tooltip-blur: blur(1px) saturate(110%);
+
+  /* Avatar */
+  --am-avatar-blur: blur(1px) saturate(110%);
+  --am-avatar-border: 1px solid rgba(255, 255, 255, 0.08);
+  --am-avatar-color: rgb(var(--v-theme-primary));
+
+  /* Table */
+  --am-table-hover-bg: rgba(255, 255, 255, 0.06);
+  --am-table-header-bg: transparent;
+
+  /* Hover Lift */
+  --am-hover-lift-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.3), 0 0 16px rgba(var(--am-primary-rgb, var(--v-theme-primary)), 0.12);
+
+  /* Code */
+  --am-code-radius: 6px;
+  --am-code-block-color: #d4d4d4;
+  --am-code-block-border: 1px solid rgba(255, 255, 255, 0.5);
+
+  /* List Item */
+  --am-list-item-radius: 12px;
+  --am-list-item-margin: 2px 0;
+
+  /* Filter Chip */
+  --am-filter-chip-bg: transparent;
+  --am-filter-chip-border: 1px solid rgba(255, 255, 255, 0.06);
+  --am-filter-chip-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --am-filter-chip-active-color: rgb(var(--v-theme-primary));
+  --am-filter-chip-outlined-color: rgb(255, 255, 255);
+
+  /* Button Variants */
+  --am-btn-primary-color: rgb(var(--v-theme-primary));
+  --am-btn-success-color: rgb(var(--v-theme-success));
+  --am-btn-warning-color: rgb(var(--v-theme-warning));
+  --am-btn-error-color: rgb(var(--v-theme-error));
+  --am-btn-primary-bg: transparent;
+  --am-btn-success-bg: transparent;
+  --am-btn-warning-bg: transparent;
+  --am-btn-error-bg: transparent;
+
+  /* Content Border */
+  --am-content-border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (orientation: portrait) {
+  html.glass-theme-acg {
+    --am-wallpaper-source: https://www.loliapi.com/acg/pe/;
+  }
+}
+
+/* ============================================================
+ * 2. 液态玻璃主题 — html.glass-theme-liquid 激活
+ *    --lg-* 变量定义在 glass-themes.css 中
+ * ============================================================ */
+
+/* ── 2a. Liquid body 级 ── */
+html.glass-theme-liquid {
+  --am-body-bg: var(--lg-bg-page);
+  --am-body-before-bg: none;
+  --am-body-before-image: none;
+  --am-body-before-filter: none;
+  --am-body-before-transform: none;
+  --am-body-after-bg: none;
+  --am-body-after-display: none;
+}
+
+/* ── 2b. Liquid 亮色组件令牌 ── */
+html.glass-theme-liquid .v-theme--light {
+  /* Surface */
+  --am-surface-bg: rgba(255, 255, 255, 0.4);
+  --am-surface-blur: blur(22px) saturate(190%);
+  --am-surface-border: 1px solid rgba(0, 0, 0, 0.1);
+  --am-surface-shadow: var(--lg-rim), var(--lg-shadow);
+  --am-surface-radius: 22px;
+  --am-surface-hover-shadow: var(--lg-rim), var(--lg-shadow-lift);
+
+  /* Overlay */
+  --am-overlay-bg: rgba(255, 255, 255, 0.52);
+  --am-overlay-blur: blur(22px) saturate(190%);
+  --am-overlay-border: 1px solid var(--lg-border);
+  --am-overlay-shadow: var(--lg-rim), var(--lg-shadow-lift);
+  --am-overlay-radius: 22px;
+  --am-dialog-radius: 22px;
+  --am-menu-radius: 22px;
+
+  /* Nav */
+  --am-nav-bg: transparent;
+  --am-nav-blur: none;
+  --am-nav-border: none;
+  --am-nav-shadow: none;
+
+  /* Field */
+  --am-field-bg: rgba(255, 255, 255, 0.4);
+  --am-field-border: 1px solid var(--lg-border);
+  --am-field-radius: 999px;
+  --am-field-shadow: var(--lg-rim-sm), 0 2px 10px -6px rgba(31, 38, 135, 0.3);
+  --am-field-focus-shadow:
+    var(--lg-rim-sm), 0 0 0 2px rgba(var(--v-theme-primary), 0.45),
+    0 4px 16px -8px rgb(var(--v-theme-primary));
+  --am-field-outline-opacity: 0;
+  --am-field-focus-outline-color: rgb(var(--v-theme-primary));
+
+  /* Button */
+  --am-btn-bg: rgba(255, 255, 255, 0.4);
+  --am-btn-blur: blur(22px) saturate(190%);
+  --am-btn-border: 1px solid var(--lg-border);
+  --am-btn-shadow: var(--lg-rim-sm), var(--lg-shadow);
+  --am-btn-radius: 999px;
+  --am-btn-hover-bg: rgba(255, 255, 255, 0.52);
+  --am-btn-hover-shadow: var(--lg-rim-sm), var(--lg-shadow);
+  --am-btn-font-weight: 500;
+  --am-btn-text-color: rgb(var(--v-theme-primary));
+  --am-btn-outlined-bg: rgba(255, 255, 255, 0.4);
+  --am-btn-outlined-hover-bg: rgba(255, 255, 255, 0.52);
+
+  /* Tab */
+  --am-tab-bg: rgba(255, 255, 255, 0.4);
+  --am-tab-blur: blur(8px) saturate(170%);
+  --am-tab-border: 1px solid var(--lg-border);
+  --am-tab-shadow: var(--lg-rim-sm);
+  --am-tab-radius: 999px;
+  --am-tab-active-color: rgb(var(--v-theme-primary));
+  --am-tab-inactive-color: rgb(0, 0, 0);
+  --am-tab-hover-color: rgb(var(--v-theme-primary));
+  --am-tab-gap: 8px;
+
+  /* Chip */
+  --am-chip-blur: blur(8px) saturate(170%);
+  --am-chip-border: 1px solid var(--lg-border);
+
+  /* Snackbar */
+  --am-snackbar-bg: rgba(255, 255, 255, 0.65);
+  --am-snackbar-blur: blur(22px) saturate(190%);
+  --am-snackbar-border: 1px solid var(--lg-border);
+  --am-snackbar-shadow: var(--lg-rim-sm), var(--lg-shadow);
+  --am-snackbar-radius: 14px;
+  --am-snackbar-text: rgb(0, 0, 0);
+
+  /* Alert */
+  --am-alert-blur: blur(10px) saturate(170%);
+  --am-alert-border: 1px solid var(--lg-border);
+
+  /* Scrim */
+  --am-scrim-blur: none;
+  --am-scrim-bg: rgba(24, 28, 58, 0.34);
+
+  /* Divider */
+  --am-divider-color: rgba(0, 0, 0, 0.08);
+
+  /* Text */
+  --am-label-color: rgb(0, 0, 0);
+  --am-label-focus-color: rgb(var(--v-theme-primary));
+  --am-input-text: rgb(0, 0, 0);
+  --am-dropdown-arrow: rgb(0, 0, 0);
+  --am-list-title: rgb(0, 0, 0);
+
+  /* Nav Active */
+  --am-nav-active-color: rgb(var(--v-theme-primary));
+  --am-nav-indicator-bg: rgb(var(--v-theme-primary));
+  --am-nav-indicator-width: 2px;
+  --am-nav-indicator-radius: 0 2px 2px 0;
+
+  /* List Active */
+  --am-list-active-color: rgb(var(--v-theme-primary));
+
+  /* Scrollbar */
+  --am-scrollbar-color: rgba(255, 255, 255, 0.35);
+  --am-scrollbar-hover: var(--el-color-primary);
+
+  /* Login */
+  --am-login-bg: rgba(255, 255, 255, 0.4);
+  --am-login-blur: blur(22px) saturate(190%);
+  --am-login-border: 1px solid var(--lg-border);
+  --am-login-shadow: var(--lg-rim), var(--lg-shadow-lift);
+  --am-login-radius: 28px;
+
+  /* Switch */
+  --am-switch-track-bg: rgba(0, 0, 0, 0.08);
+  --am-switch-track-active-bg: rgb(var(--v-theme-primary));
+
+  /* Checkbox / Radio */
+  --am-check-active-color: rgb(var(--v-theme-primary));
+  --am-check-inactive-color: rgba(120, 130, 145, 0.65);
+
+  /* Slider */
+  --am-slider-track-bg: rgba(0, 0, 0, 0.08);
+  --am-slider-fill-bg: rgb(var(--v-theme-primary));
+  --am-slider-thumb-shadow: 0 0 6px rgba(var(--v-theme-primary), 0.35);
+
+  /* Progress */
+  --am-progress-fill-bg: rgb(var(--v-theme-primary));
+  --am-progress-circular-stroke: rgb(var(--v-theme-primary));
+
+  /* BtnToggle */
+  --am-btn-toggle-border: 1px solid var(--lg-border);
+  --am-btn-toggle-radius: 999px;
+  --am-btn-toggle-active-bg: rgba(var(--v-theme-primary), 0.15);
+  --am-btn-toggle-active-color: rgb(var(--v-theme-primary));
+
+  /* Tooltip */
+  --am-tooltip-blur: blur(10px) saturate(170%);
+
+  /* Avatar */
+  --am-avatar-blur: blur(10px) saturate(170%);
+  --am-avatar-border: 1px solid var(--lg-border);
+  --am-avatar-color: rgb(var(--v-theme-primary));
+
+  /* Table */
+  --am-table-hover-bg: rgba(255, 255, 255, 0.35);
+  --am-table-header-bg: rgba(255, 255, 255, 0.25);
+
+  /* Hover Lift */
+  --am-hover-lift-shadow: var(--lg-rim), var(--lg-shadow-lift);
+
+  /* Code */
+  --am-code-radius: 6px;
+  --am-code-block-color: rgb(0, 0, 0);
+  --am-code-block-border: 1px solid var(--lg-border);
+
+  /* Panel */
+  --am-panel-shadow: var(--lg-rim), var(--lg-shadow);
+
+  /* List Item */
+  --am-list-item-radius: 14px;
+  --am-list-item-margin: 2px 4px;
+
+  /* Filter Chip */
+  --am-filter-chip-bg: rgba(255, 255, 255, 0.4);
+  --am-filter-chip-border: 1px solid var(--lg-border);
+  --am-filter-chip-shadow: var(--lg-rim-sm);
+  --am-filter-chip-active-color: rgb(var(--v-theme-primary));
+  --am-filter-chip-outlined-color: rgb(0, 0, 0);
+
+  /* Button Variants */
+  --am-btn-primary-color: rgb(var(--v-theme-primary));
+  --am-btn-success-color: rgb(var(--v-theme-primary));
+  --am-btn-warning-color: rgb(var(--v-theme-primary));
+  --am-btn-error-color: rgb(var(--v-theme-primary));
+  --am-btn-primary-bg: rgba(255, 255, 255, 0.4);
+  --am-btn-success-bg: rgba(255, 255, 255, 0.4);
+  --am-btn-warning-bg: rgba(255, 255, 255, 0.4);
+  --am-btn-error-bg: rgba(255, 255, 255, 0.4);
+
+  /* Content Border */
+  --am-content-border: 1px solid var(--lg-border);
+}
+
+/* ── 2c. Liquid 暗色组件覆盖 ── */
+html.glass-theme-liquid .v-theme--dark {
+  --am-surface-bg: rgba(28, 30, 52, 0.44);
+  --am-surface-border: 1px solid rgba(255, 255, 255, 0.08);
+  --am-surface-radius: 22px;
+
+  --am-overlay-bg: rgba(28, 30, 52, 0.56);
+  --am-overlay-border: 1px solid var(--lg-border);
+
+  --am-field-bg: rgba(28, 30, 52, 0.44);
+  --am-field-hover-bg: rgba(28, 30, 52, 0.56);
+
+  --am-btn-bg: rgba(28, 30, 52, 0.44);
+  --am-btn-hover-bg: rgba(28, 30, 52, 0.56);
+  --am-btn-outlined-bg: rgba(28, 30, 52, 0.44);
+  --am-btn-outlined-hover-bg: rgba(28, 30, 52, 0.56);
+
+  --am-tab-bg: rgba(28, 30, 52, 0.44);
+  --am-tab-inactive-color: rgb(255, 255, 255);
+
+  --am-snackbar-bg: rgba(28, 30, 52, 0.72);
+  --am-snackbar-text: rgb(255, 255, 255);
+
+  --am-scrim-bg: rgba(2, 3, 10, 0.58);
+
+  --am-divider-color: rgba(255, 255, 255, 0.06);
+
+  --am-label-color: rgb(255, 255, 255);
+  --am-input-text: rgb(255, 255, 255);
+  --am-dropdown-arrow: rgb(255, 255, 255);
+  --am-list-title: rgb(255, 255, 255);
+
+  --am-scrollbar-color: rgba(255, 255, 255, 0.25);
+
+  --am-switch-track-bg: rgba(255, 255, 255, 0.1);
+  --am-slider-track-bg: rgba(255, 255, 255, 0.1);
+
+  --am-table-hover-bg: rgba(28, 30, 52, 0.45);
+  --am-table-header-bg: rgba(28, 30, 52, 0.3);
+
+  --am-filter-chip-bg: rgba(28, 30, 52, 0.44);
+  --am-filter-chip-outlined-color: rgb(255, 255, 255);
+
+  --am-btn-primary-bg: rgba(28, 30, 52, 0.44);
+  --am-btn-success-bg: rgba(28, 30, 52, 0.44);
+  --am-btn-warning-bg: rgba(28, 30, 52, 0.44);
+  --am-btn-error-bg: rgba(28, 30, 52, 0.44);
+
+  /* ── 以下从 light 继承（不分明暗的结构性变量） ── */
+  --am-alert-blur: blur(10px) saturate(170%);
+  --am-alert-border: 1px solid var(--lg-border);
+  --am-avatar-blur: blur(10px) saturate(170%);
+  --am-avatar-border: 1px solid var(--lg-border);
+  --am-avatar-color: rgb(var(--v-theme-primary));
+  --am-btn-blur: blur(22px) saturate(190%);
+  --am-btn-border: 1px solid var(--lg-border);
+  --am-btn-error-color: rgb(var(--v-theme-primary));
+  --am-btn-font-weight: 500;
+  --am-btn-hover-shadow: var(--lg-rim-sm), var(--lg-shadow);
+  --am-btn-primary-color: rgb(var(--v-theme-primary));
+  --am-btn-radius: 999px;
+  --am-btn-shadow: var(--lg-rim-sm), var(--lg-shadow);
+  --am-btn-success-color: rgb(var(--v-theme-primary));
+  --am-btn-text-color: rgb(var(--v-theme-primary));
+  --am-btn-toggle-active-bg: rgba(var(--v-theme-primary), 0.15);
+  --am-btn-toggle-active-color: rgb(var(--v-theme-primary));
+  --am-btn-toggle-border: 1px solid var(--lg-border);
+  --am-btn-toggle-radius: 999px;
+  --am-btn-warning-color: rgb(var(--v-theme-primary));
+  --am-check-active-color: rgb(var(--v-theme-primary));
+  --am-check-inactive-color: rgba(120, 130, 145, 0.65);
+  --am-chip-blur: blur(8px) saturate(170%);
+  --am-chip-border: 1px solid var(--lg-border);
+  --am-code-block-border: 1px solid var(--lg-border);
+  --am-code-block-color: rgb(0, 0, 0);
+  --am-code-radius: 6px;
+  --am-content-border: 1px solid var(--lg-border);
+  --am-dialog-radius: 22px;
+  --am-field-border: 1px solid var(--lg-border);
+  --am-field-focus-outline-color: rgb(var(--v-theme-primary));
+  --am-field-focus-shadow:
+    var(--lg-rim-sm), 0 0 0 2px rgba(var(--v-theme-primary), 0.45),
+    0 4px 16px -8px rgb(var(--v-theme-primary));
+  --am-field-outline-opacity: 0;
+  --am-field-radius: 999px;
+  --am-filter-chip-active-color: rgb(var(--v-theme-primary));
+  --am-filter-chip-border: 1px solid var(--lg-border);
+  --am-filter-chip-shadow: var(--lg-rim-sm);
+  --am-hover-lift-shadow: var(--lg-rim), var(--lg-shadow-lift);
+  --am-label-focus-color: rgb(var(--v-theme-primary));
+  --am-list-active-color: rgb(var(--v-theme-primary));
+  --am-list-item-margin: 2px 4px;
+  --am-list-item-radius: 14px;
+  --am-login-bg: rgba(255, 255, 255, 0.4);
+  --am-login-blur: blur(22px) saturate(190%);
+  --am-login-border: 1px solid var(--lg-border);
+  --am-login-radius: 28px;
+  --am-login-shadow: var(--lg-rim), var(--lg-shadow-lift);
+  --am-menu-radius: 22px;
+  --am-nav-active-color: rgb(var(--v-theme-primary));
+  --am-nav-bg: transparent;
+  --am-nav-blur: none;
+  --am-nav-border: none;
+  --am-nav-indicator-bg: rgb(var(--v-theme-primary));
+  --am-nav-indicator-radius: 0 2px 2px 0;
+  --am-nav-indicator-width: 2px;
+  --am-nav-shadow: none;
+  --am-overlay-blur: blur(22px) saturate(190%);
+  --am-overlay-radius: 22px;
+  --am-overlay-shadow: var(--lg-rim), var(--lg-shadow-lift);
+  --am-progress-circular-stroke: rgb(var(--v-theme-primary));
+  --am-progress-fill-bg: rgb(var(--v-theme-primary));
+  --am-scrim-blur: none;
+  --am-scrollbar-hover: var(--el-color-primary);
+  --am-slider-fill-bg: rgb(var(--v-theme-primary));
+  --am-slider-thumb-shadow: 0 0 6px rgba(var(--v-theme-primary), 0.35);
+  --am-snackbar-blur: blur(22px) saturate(190%);
+  --am-snackbar-border: 1px solid var(--lg-border);
+  --am-snackbar-radius: 14px;
+  --am-snackbar-shadow: var(--lg-rim-sm), var(--lg-shadow);
+  --am-surface-blur: blur(22px) saturate(190%);
+  --am-surface-hover-shadow: var(--lg-rim), var(--lg-shadow-lift);
+  --am-surface-shadow: var(--lg-rim), var(--lg-shadow);
+  --am-switch-track-active-bg: rgb(var(--v-theme-primary));
+  --am-tab-active-color: rgb(var(--v-theme-primary));
+  --am-tab-blur: blur(8px) saturate(170%);
+  --am-tab-border: 1px solid var(--lg-border);
+  --am-tab-gap: 8px;
+  --am-tab-hover-color: rgb(var(--v-theme-primary));
+  --am-tab-radius: 999px;
+  --am-tab-shadow: var(--lg-rim-sm);
+  --am-tooltip-blur: blur(10px) saturate(170%);
+}
+
+/* ============================================================
+ * 3. 经典实色主题 — html.glass-theme-classic 激活
+ * ============================================================ */
+
+/* ── 3a. Classic body 级 ── */
+html.glass-theme-classic.glass-light {
+  --am-body-bg: #ffffff;
+  --am-login-field-bg: #ffffff;
+  --am-body-before-bg: none;
+  --am-body-before-image: none;
+  --am-body-before-filter: none;
+  --am-body-before-transform: none;
+  --am-body-after-bg: none;
+  --am-body-after-display: none;
+}
+
+html.glass-theme-classic.glass-dark {
+  --am-body-bg: #121212;
+  --am-login-field-bg: #2c2c2c;
+}
+
+/* ── 3b. Classic 亮色组件令牌 ── */
+html.glass-theme-classic .v-theme--light {
+  /* Surface */
+  --am-surface-bg: #ffffff;
+  --am-surface-blur: none;
+  --am-surface-border: 1px solid rgba(0, 0, 0, 0.4);
+  --am-surface-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --am-surface-radius: 12px;
+  --am-surface-hover-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  /* Overlay */
+  --am-overlay-bg: #ffffff;
+  --am-overlay-blur: none;
+  --am-overlay-border: none;
+  --am-overlay-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  --am-overlay-radius: 8px;
+  --am-dialog-radius: 12px;
+  --am-menu-radius: 8px;
+
+  /* Nav */
+  --am-nav-bg: #ffffff;
+  --am-nav-blur: none;
+  --am-nav-border: none;
+  --am-nav-shadow: none;
+
+  /* Field */
+  --am-field-bg: #ffffff;
+  --am-field-border: none;
+  --am-field-radius: 8px;
+  --am-field-shadow: none;
+  --am-field-focus-shadow: 0 0 0 1px rgb(var(--v-theme-primary));
+  --am-field-outline-opacity: 1;
+  --am-field-focus-outline-color: rgb(var(--v-theme-primary));
+
+  /* Button */
+  --am-btn-bg: transparent;
+  --am-btn-blur: none;
+  --am-btn-border: none;
+  --am-btn-shadow: none;
+  --am-btn-radius: 8px;
+  --am-btn-hover-bg: transparent;
+  --am-btn-hover-shadow: none;
+  --am-btn-font-weight: 500;
+  --am-btn-text-color: inherit;
+  --am-btn-outlined-bg: transparent;
+  --am-btn-outlined-hover-bg: transparent;
+
+  /* Tab */
+  --am-tab-bg: transparent;
+  --am-tab-blur: none;
+  --am-tab-border: none;
+  --am-tab-shadow: none;
+  --am-tab-radius: 0;
+  --am-tab-active-color: rgb(var(--v-theme-primary));
+  --am-tab-inactive-color: rgb(var(--v-theme-on-surface));
+  --am-tab-hover-color: rgb(var(--v-theme-primary));
+  --am-tab-gap: 0;
+
+  /* Chip */
+  --am-chip-blur: none;
+  --am-chip-border: none;
+
+  /* Snackbar */
+  --am-snackbar-bg: #ffffff;
+  --am-snackbar-blur: none;
+  --am-snackbar-border: none;
+  --am-snackbar-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --am-snackbar-radius: 8px;
+  --am-snackbar-text: #1a1a1a;
+
+  /* Alert */
+  --am-alert-blur: none;
+  --am-alert-border: none;
+
+  /* Scrim */
+  --am-scrim-blur: none;
+  --am-scrim-bg: rgba(0, 0, 0, 0.32);
+
+  /* Divider */
+  --am-divider-color: rgba(0, 0, 0, 0.08);
+
+  /* Text */
+  --am-label-color: rgb(0, 0, 0);
+  --am-label-focus-color: rgb(var(--v-theme-primary));
+  --am-input-text: rgb(0, 0, 0);
+  --am-dropdown-arrow: rgb(0, 0, 0);
+  --am-list-title: rgb(0, 0, 0);
+
+  /* Nav Active */
+  --am-nav-active-color: rgb(var(--v-theme-primary));
+  --am-nav-indicator-bg: rgb(var(--v-theme-primary));
+  --am-nav-indicator-width: 3px;
+  --am-nav-indicator-radius: 0 3px 3px 0;
+
+  /* List Active */
+  --am-list-active-color: rgb(var(--v-theme-primary));
+
+  /* Scrollbar */
+  --am-scrollbar-color: rgba(var(--v-theme-on-surface), 0.18);
+  --am-scrollbar-hover: rgba(var(--v-theme-on-surface), 0.32);
+
+  /* Login */
+  --am-login-bg: #ffffff;
+  --am-login-blur: none;
+  --am-login-border: none;
+  --am-login-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  --am-login-radius: 16px;
+
+  /* Switch */
+  --am-switch-track-bg: rgba(0, 0, 0, 0.12);
+  --am-switch-track-active-bg: rgb(var(--v-theme-primary));
+
+  /* Checkbox / Radio */
+  --am-check-active-color: rgb(var(--v-theme-primary));
+  --am-check-inactive-color: rgba(120, 130, 145, 0.65);
+
+  /* Slider */
+  --am-slider-track-bg: rgba(var(--v-theme-on-surface), 0.12);
+  --am-slider-fill-bg: rgb(var(--v-theme-primary));
+  --am-slider-thumb-shadow: 0 0 6px rgba(var(--v-theme-primary), 0.35);
+
+  /* Progress */
+  --am-progress-fill-bg: rgb(var(--v-theme-primary));
+  --am-progress-circular-stroke: rgb(var(--v-theme-primary));
+
+  /* BtnToggle */
+  --am-btn-toggle-border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  --am-btn-toggle-radius: 8px;
+  --am-btn-toggle-active-bg: rgba(var(--v-theme-primary), 0.15);
+  --am-btn-toggle-active-color: rgb(var(--v-theme-primary));
+
+  /* Tooltip */
+  --am-tooltip-blur: none;
+
+  /* Avatar */
+  --am-avatar-blur: none;
+  --am-avatar-border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  --am-avatar-color: rgb(var(--v-theme-primary));
+
+  /* Table */
+  --am-table-hover-bg: rgba(0, 0, 0, 0.04);
+  --am-table-header-bg: rgba(0, 0, 0, 0.02);
+
+  /* Hover Lift */
+  --am-hover-lift-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  /* Code */
+  --am-code-radius: 4px;
+  --am-code-block-color: rgb(0, 0, 0);
+  --am-code-block-border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+
+  /* List Item */
+  --am-list-item-radius: 4px;
+  --am-list-item-margin: 0;
+
+  /* Filter Chip */
+  --am-filter-chip-bg: transparent;
+  --am-filter-chip-border: none;
+  --am-filter-chip-shadow: none;
+  --am-filter-chip-active-color: rgb(var(--v-theme-primary));
+  --am-filter-chip-outlined-color: rgb(var(--v-theme-on-surface));
+
+  /* Button Variants */
+  --am-btn-primary-color: #fff;
+  --am-btn-success-color: #fff;
+  --am-btn-warning-color: #fff;
+  --am-btn-error-color: #fff;
+  --am-btn-primary-bg: rgb(var(--v-theme-primary));
+  --am-btn-success-bg: rgb(var(--v-theme-success));
+  --am-btn-warning-bg: rgb(var(--v-theme-warning));
+  --am-btn-error-bg: rgb(var(--v-theme-error));
+
+  /* Content Border */
+  --am-content-border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+/* ── 3c. Classic 暗色组件覆盖 ── */
+html.glass-theme-classic .v-theme--dark {
+  --am-surface-bg: #1e1e1e;
+  --am-surface-border: 1px solid rgba(255, 255, 255, 0.4);
+  --am-surface-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --am-surface-radius: 12px;
+  --am-surface-hover-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  --am-overlay-bg: #1e1e1e;
+  --am-overlay-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+  --am-nav-bg: #1e1e1e;
+
+  --am-field-bg: #2c2c2c;
+
+  --am-snackbar-bg: #333333;
+  --am-snackbar-text: #ffffff;
+
+  --am-scrim-bg: rgba(0, 0, 0, 0.54);
+
+  --am-divider-color: rgba(255, 255, 255, 0.08);
+
+  --am-label-color: rgb(255, 255, 255);
+  --am-input-text: rgb(255, 255, 255);
+  --am-dropdown-arrow: rgb(255, 255, 255);
+  --am-list-title: rgb(255, 255, 255);
+
+  --am-switch-track-bg: rgba(255, 255, 255, 0.14);
+
+  --am-slider-track-bg: rgba(var(--v-theme-on-surface), 0.12);
+
+  --am-table-hover-bg: rgba(255, 255, 255, 0.06);
+  --am-table-header-bg: rgba(255, 255, 255, 0.02);
+
+  --am-content-border: 1px solid rgba(255, 255, 255, 0.4);
+
+  /* ── 以下从 light 继承（不分明暗的结构性变量） ── */
+  --am-alert-blur: none;
+  --am-alert-border: none;
+  --am-avatar-blur: none;
+  --am-avatar-border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  --am-avatar-color: rgb(var(--v-theme-primary));
+  --am-btn-bg: transparent;
+  --am-btn-blur: none;
+  --am-btn-border: none;
+  --am-btn-error-bg: rgb(var(--v-theme-error));
+  --am-btn-error-color: #fff;
+  --am-btn-font-weight: 500;
+  --am-btn-hover-bg: transparent;
+  --am-btn-hover-shadow: none;
+  --am-btn-outlined-bg: transparent;
+  --am-btn-outlined-hover-bg: transparent;
+  --am-btn-primary-bg: rgb(var(--v-theme-primary));
+  --am-btn-primary-color: #fff;
+  --am-btn-radius: 8px;
+  --am-btn-shadow: none;
+  --am-btn-success-bg: rgb(var(--v-theme-success));
+  --am-btn-success-color: #fff;
+  --am-btn-text-color: inherit;
+  --am-btn-toggle-active-bg: rgba(var(--v-theme-primary), 0.15);
+  --am-btn-toggle-active-color: rgb(var(--v-theme-primary));
+  --am-btn-toggle-border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  --am-btn-toggle-radius: 8px;
+  --am-btn-warning-bg: rgb(var(--v-theme-warning));
+  --am-btn-warning-color: #fff;
+  --am-check-active-color: rgb(var(--v-theme-primary));
+  --am-check-inactive-color: rgba(120, 130, 145, 0.65);
+  --am-chip-blur: none;
+  --am-chip-border: none;
+  --am-code-block-border: 1px solid rgba(var(--v-theme-on-surface), 0.12);
+  --am-code-block-color: rgb(0, 0, 0);
+  --am-code-radius: 4px;
+  --am-dialog-radius: 12px;
+  --am-field-border: none;
+  --am-field-focus-outline-color: rgb(var(--v-theme-primary));
+  --am-field-focus-shadow: 0 0 0 1px rgb(var(--v-theme-primary));
+  --am-field-outline-opacity: 1;
+  --am-field-radius: 8px;
+  --am-filter-chip-active-color: rgb(var(--v-theme-primary));
+  --am-filter-chip-bg: transparent;
+  --am-filter-chip-border: none;
+  --am-filter-chip-outlined-color: rgb(var(--v-theme-on-surface));
+  --am-filter-chip-shadow: none;
+  --am-hover-lift-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --am-label-focus-color: rgb(var(--v-theme-primary));
+  --am-list-active-color: rgb(var(--v-theme-primary));
+  --am-list-item-margin: 0;
+  --am-list-item-radius: 4px;
+  --am-login-bg: #ffffff;
+  --am-login-blur: none;
+  --am-login-border: none;
+  --am-login-radius: 16px;
+  --am-login-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  --am-menu-radius: 8px;
+  --am-nav-active-color: rgb(var(--v-theme-primary));
+  --am-nav-blur: none;
+  --am-nav-border: none;
+  --am-nav-indicator-bg: rgb(var(--v-theme-primary));
+  --am-nav-indicator-radius: 0 3px 3px 0;
+  --am-nav-indicator-width: 3px;
+  --am-nav-shadow: none;
+  --am-overlay-blur: none;
+  --am-overlay-border: none;
+  --am-overlay-radius: 8px;
+  --am-progress-circular-stroke: rgb(var(--v-theme-primary));
+  --am-progress-fill-bg: rgb(var(--v-theme-primary));
+  --am-scrim-blur: none;
+  --am-scrollbar-color: rgba(var(--v-theme-on-surface), 0.18);
+  --am-scrollbar-hover: rgba(var(--v-theme-on-surface), 0.32);
+  --am-slider-fill-bg: rgb(var(--v-theme-primary));
+  --am-slider-thumb-shadow: 0 0 6px rgba(var(--v-theme-primary), 0.35);
+  --am-snackbar-blur: none;
+  --am-snackbar-border: none;
+  --am-snackbar-radius: 8px;
+  --am-snackbar-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --am-surface-blur: none;
+  --am-switch-track-active-bg: rgb(var(--v-theme-primary));
+  --am-tab-active-color: rgb(var(--v-theme-primary));
+  --am-tab-bg: transparent;
+  --am-tab-blur: none;
+  --am-tab-border: none;
+  --am-tab-gap: 0;
+  --am-tab-hover-color: rgb(var(--v-theme-primary));
+  --am-tab-inactive-color: rgb(var(--v-theme-on-surface));
+  --am-tab-radius: 0;
+  --am-tab-shadow: none;
+  --am-tooltip-blur: none;
+}
+
+/* ============================================================
+ * 日志级别色 — 供 LogTerminal 组件的级别文字与侧条统一消费。
+ * classic 与 liquid 共用一套值（亮暗两套），ACG 自成一套（恒暗色）。
+ * ============================================================ */
+
+html.glass-theme-classic,
+html.glass-theme-liquid {
+  /* 暗色值（默认） */
+  --am-log-info: #5e5ce6;
+  --am-log-warning: #ff9f0a;
+  --am-log-error: #ff375f;
+  --am-log-critical: #f48fb1;
+  --am-log-success: #30d158;
+  --am-log-debug: rgba(255, 255, 255, 0.35);
+}
+
+html.glass-theme-classic.glass-light,
+html.glass-theme-liquid.glass-light {
+  /* 亮色值（info 两态相同，无需覆盖） */
+  --am-log-warning: #c2410c;
+  --am-log-error: #b91c1c;
+  --am-log-critical: #9d174d;
+  --am-log-success: #15803d;
+  --am-log-debug: rgba(0, 0, 0, 0.35);
+}
+
+html.glass-theme-acg {
+  --am-log-info: #4ecdc4;
+  --am-log-warning: #ffb74d;
+  --am-log-error: #ef5350;
+  --am-log-critical: #f48fb1;
+  --am-log-success: #81c784;
+  --am-log-debug: rgba(255, 255, 255, 0.4);
+}
+
+/* ════════════════════════════════════════════════════════════════
+ * 全局圆角控制 — 由 useThemeCustomizer 的 radius 设置驱动
+ * data-theme-radius 属性由 applyThemeCustomizerRootSettings 写入。
+ *
+ * 档位说明：
+ *   none     — 无圆角（0px）
+ *   small    — 小圆角（4-8px）
+ *   default  — 默认（不覆盖，保持各主题自身的圆角值）
+ *   large    — 大圆角（20-28px）
+ *   extra    — 更大圆角（28-36px）
+ *
+ * 注意：pill 形（999px）的 tab/btn 在 none/small 档位会被强制转为直角/小圆角。
+ * ════════════════════════════════════════════════════════════════ */
+
+/* ── 无圆角 ── */
+html[data-theme-radius='none'],
+html[data-theme-radius='none'] .v-theme--light,
+html[data-theme-radius='none'] .v-theme--dark {
+  --am-surface-radius: 0px;
+  --am-overlay-radius: 0px;
+  --am-dialog-radius: 0px;
+  --am-menu-radius: 0px;
+  --am-field-radius: 0px;
+  --am-btn-radius: 0px;
+  --am-tab-radius: 0px;
+  --am-list-item-radius: 0px;
+  --am-snackbar-radius: 0px;
+  --am-btn-toggle-radius: 0px;
+  --am-login-radius: 0px;
+  --am-chip-radius: 0px;
+  --am-code-radius: 0px;
+}
+
+/* ── 小圆角 ── */
+html[data-theme-radius='small'],
+html[data-theme-radius='small'] .v-theme--light,
+html[data-theme-radius='small'] .v-theme--dark {
+  --am-surface-radius: 6px;
+  --am-overlay-radius: 6px;
+  --am-dialog-radius: 8px;
+  --am-menu-radius: 6px;
+  --am-field-radius: 6px;
+  --am-btn-radius: 4px;
+  --am-tab-radius: 4px;
+  --am-list-item-radius: 4px;
+  --am-snackbar-radius: 4px;
+  --am-btn-toggle-radius: 4px;
+  --am-login-radius: 8px;
+  --am-chip-radius: 4px;
+  --am-code-radius: 3px;
+}
+
+/* ── 默认：不覆盖，保持各主题自身的圆角值 ── */
+
+/* ── 大圆角 ── */
+html[data-theme-radius='large'],
+html[data-theme-radius='large'] .v-theme--light,
+html[data-theme-radius='large'] .v-theme--dark {
+  --am-surface-radius: 20px;
+  --am-overlay-radius: 24px;
+  --am-dialog-radius: 28px;
+  --am-menu-radius: 24px;
+  --am-field-radius: 20px;
+  --am-btn-radius: 16px;
+  --am-tab-radius: 999px;
+  --am-list-item-radius: 16px;
+  --am-snackbar-radius: 16px;
+  --am-btn-toggle-radius: 20px;
+  --am-login-radius: 28px;
+  --am-chip-radius: 12px;
+  --am-code-radius: 8px;
+}
+
+/* ── 更大圆角 ── */
+html[data-theme-radius='extra'],
+html[data-theme-radius='extra'] .v-theme--light,
+html[data-theme-radius='extra'] .v-theme--dark {
+  --am-surface-radius: 28px;
+  --am-overlay-radius: 32px;
+  --am-dialog-radius: 36px;
+  --am-menu-radius: 32px;
+  --am-field-radius: 28px;
+  --am-btn-radius: 24px;
+  --am-tab-radius: 999px;
+  --am-list-item-radius: 24px;
+  --am-snackbar-radius: 20px;
+  --am-btn-toggle-radius: 28px;
+  --am-login-radius: 36px;
+  --am-chip-radius: 16px;
+  --am-code-radius: 12px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+ * 全局阴影控制 — 由 useThemeCustomizer 的 shadow 设置驱动
+ * data-theme-shadow 属性由 applyThemeCustomizerRootSettings 写入。
+ *
+ * 档位说明：
+ *   none     — 无阴影（全部 none）
+ *   subtle   — 轻微阴影（极淡投影）
+ *   default  — 默认（不覆盖，保持各主题自身的阴影值）
+ *   prominent — 明显阴影
+ *   dramatic  — 夸张阴影
+ *
+ * 覆盖范围：卡片(surface)、弹窗(overlay)、按钮(btn)、Tab、
+ * 输入框(field)、折叠面板(panel)、snackbar、login、hover-lift、
+ * 筛选芯片(filter-chip)、开关/滑块拇指。
+ * ════════════════════════════════════════════════════════════════ */
+
+/* ── 无阴影 ── */
+html[data-theme-shadow='none'],
+html[data-theme-shadow='none'] .v-theme--light,
+html[data-theme-shadow='none'] .v-theme--dark {
+  --am-surface-shadow: none;
+  --am-surface-hover-shadow: none;
+  --am-overlay-shadow: none;
+  --am-panel-shadow: none;
+  --am-hover-lift-shadow: none;
+  --am-btn-shadow: none;
+  --am-btn-hover-shadow: none;
+  --am-tab-shadow: none;
+  --am-field-shadow: none;
+  --am-snackbar-shadow: none;
+  --am-login-shadow: none;
+  --am-filter-chip-shadow: none;
+  --am-switch-thumb-shadow: none;
+  --am-slider-thumb-shadow: none;
+
+  /* ACG 主题玻璃阴影 */
+  --glass-shadow: none;
+  --glass-shadow-raised: none;
+  --glass-shadow-hover: none;
+  --glass-navbar-shadow: none;
+
+  /* Liquid 主题液态阴影 */
+  --lg-shadow: none;
+  --lg-shadow-lift: none;
+}
+
+/* ── 轻微阴影 ── */
+html[data-theme-shadow='subtle'],
+html[data-theme-shadow='subtle'] .v-theme--light,
+html[data-theme-shadow='subtle'] .v-theme--dark {
+  --am-surface-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --am-surface-hover-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --am-overlay-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --am-panel-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --am-hover-lift-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --am-btn-shadow: none;
+  --am-btn-hover-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --am-tab-shadow: none;
+  --am-field-shadow: none;
+  --am-snackbar-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --am-login-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --am-filter-chip-shadow: none;
+  --am-switch-thumb-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  --am-slider-thumb-shadow: none;
+
+  /* ACG */
+  --glass-shadow: 0 2px 8px rgba(3, 7, 18, 10%);
+  --glass-shadow-raised: 0 4px 12px rgba(3, 7, 18, 14%);
+  --glass-shadow-hover: 0 6px 16px rgba(3, 7, 18, 18%);
+  --glass-navbar-shadow: 0 1px 4px rgba(3, 7, 18, 8%);
+
+  /* Liquid */
+  --lg-shadow: 0 2px 8px -4px rgba(31, 38, 135, 0.12);
+  --lg-shadow-lift: 0 4px 12px -6px rgba(31, 38, 135, 0.16);
+}
+
+/* ── 默认：不覆盖，保持各主题自身的阴影值 ── */
+
+/* ── 明显阴影 ── */
+html[data-theme-shadow='prominent'],
+html[data-theme-shadow='prominent'] .v-theme--light,
+html[data-theme-shadow='prominent'] .v-theme--dark {
+  --am-surface-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  --am-surface-hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  --am-overlay-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  --am-panel-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  --am-hover-lift-shadow: 0 12px 32px rgba(0, 0, 0, 0.22), 0 0 20px rgba(var(--am-primary-rgb, var(--v-theme-primary)), 0.15);
+  --am-btn-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --am-btn-hover-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  --am-tab-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --am-field-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --am-snackbar-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  --am-login-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  --am-filter-chip-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --am-switch-thumb-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  --am-slider-thumb-shadow: 0 0 14px rgba(var(--v-theme-primary), 0.5);
+
+  /* ACG */
+  --glass-shadow: 0 14px 36px rgba(3, 7, 18, 32%), inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 6%)), inset 0 -1px 0 rgba(2, 6, 16, 14%);
+  --glass-shadow-raised: 0 20px 50px rgba(3, 7, 18, 40%), inset 0 1px 0 rgba(255, 255, 255, 24%), inset 0 -1px 0 rgba(2, 6, 16, 18%);
+  --glass-shadow-hover: 0 24px 56px rgba(3, 7, 18, 44%), inset 0 1px 0 rgba(255, 255, 255, 28%), inset 0 -1px 0 rgba(2, 6, 16, 18%);
+  --glass-navbar-shadow: 0 6px 20px rgba(3, 7, 18, 24%), inset 0 1px 0 rgba(255, 255, 255, 10%), inset 0 -1px 0 rgba(2, 6, 16, 12%);
+
+  /* Liquid */
+  --lg-shadow: 0 14px 42px -12px rgba(31, 38, 135, 0.38), 0 4px 12px -4px rgba(31, 38, 135, 0.22);
+  --lg-shadow-lift: 0 28px 60px -14px rgba(31, 38, 135, 0.46), 0 6px 16px -6px rgba(31, 38, 135, 0.28);
+}
+
+/* ── 夸张阴影 ── */
+html[data-theme-shadow='dramatic'],
+html[data-theme-shadow='dramatic'] .v-theme--light,
+html[data-theme-shadow='dramatic'] .v-theme--dark {
+  --am-surface-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+  --am-surface-hover-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+  --am-overlay-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --am-panel-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+  --am-hover-lift-shadow: 0 20px 48px rgba(0, 0, 0, 0.35), 0 0 28px rgba(var(--am-primary-rgb, var(--v-theme-primary)), 0.2);
+  --am-btn-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --am-btn-hover-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  --am-tab-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --am-field-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --am-snackbar-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  --am-login-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
+  --am-filter-chip-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --am-switch-thumb-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  --am-slider-thumb-shadow: 0 0 20px rgba(var(--v-theme-primary), 0.6);
+
+  /* ACG */
+  --glass-shadow: 0 20px 48px rgba(3, 7, 18, 42%), inset 0 1px 0 var(--glass-highlight, rgba(255, 255, 255, 6%)), inset 0 -1px 0 rgba(2, 6, 16, 14%);
+  --glass-shadow-raised: 0 28px 64px rgba(3, 7, 18, 52%), inset 0 1px 0 rgba(255, 255, 255, 24%), inset 0 -1px 0 rgba(2, 6, 16, 18%);
+  --glass-shadow-hover: 0 32px 72px rgba(3, 7, 18, 56%), inset 0 1px 0 rgba(255, 255, 255, 28%), inset 0 -1px 0 rgba(2, 6, 16, 18%);
+  --glass-navbar-shadow: 0 10px 32px rgba(3, 7, 18, 32%), inset 0 1px 0 rgba(255, 255, 255, 10%), inset 0 -1px 0 rgba(2, 6, 16, 12%);
+
+  /* Liquid */
+  --lg-shadow: 0 20px 56px -12px rgba(31, 38, 135, 0.46), 0 6px 16px -4px rgba(31, 38, 135, 0.28);
+  --lg-shadow-lift: 0 36px 72px -14px rgba(31, 38, 135, 0.54), 0 8px 20px -6px rgba(31, 38, 135, 0.34);
+}
+
+/* ════════════════════════════════════════════════════════════════
+ * 全局边框控制 — 由 useThemeCustomizer 的 border 设置驱动
+ * data-theme-border 属性由 applyThemeCustomizerRootSettings 写入。
+ *
+ * 档位说明：
+ *   none      — 无边框（全部 none）
+ *   subtle    — 轻微边框（极淡描边）
+ *   default   — 默认（不覆盖，保持各主题自身的边框值）
+ *   prominent — 明显边框
+ *   dramatic  — 强边框（粗线 + 高对比度）
+ *
+ * 覆盖范围：卡片(surface)、弹窗(overlay)、导航(nav)、按钮(btn)、
+ * Tab、输入框(field)、芯片(chip)、snackbar、alert、login、
+ * btn-toggle、avatar、filter-chip、content-border。
+ * ════════════════════════════════════════════════════════════════ */
+
+/* ── 无边框 ── */
+html[data-theme-border='none'],
+html[data-theme-border='none'] .v-theme--light,
+html[data-theme-border='none'] .v-theme--dark {
+  --am-surface-border: none;
+  --am-overlay-border: none;
+  --am-nav-border: none;
+  --am-field-border: none;
+  --am-btn-border: none;
+  --am-tab-border: none;
+  --am-chip-border: none;
+  --am-snackbar-border: none;
+  --am-alert-border: none;
+  --am-login-border: none;
+  --am-btn-toggle-border: none;
+  --am-avatar-border: none;
+  --am-code-block-border: none;
+  --am-filter-chip-border: none;
+  --am-content-border: none;
+
+  /* ACG */
+  --glass-border: transparent;
+  --glass-border-raised: transparent;
+  --glass-border-hover: transparent;
+
+  /* Liquid */
+  --lg-border: transparent;
+  --lg-border-strong: transparent;
+}
+
+/* ── 轻微边框 ── */
+html[data-theme-border='subtle'],
+html[data-theme-border='subtle'] .v-theme--light,
+html[data-theme-border='subtle'] .v-theme--dark {
+  --am-surface-border: 1px solid rgba(var(--v-theme-on-surface), 0.04);
+  --am-overlay-border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+  --am-nav-border: 1px solid rgba(var(--v-theme-on-surface), 0.04);
+  --am-field-border: 1px solid rgba(var(--v-theme-on-surface), 0.04);
+  --am-btn-border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+  --am-tab-border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+  --am-chip-border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+  --am-snackbar-border: 1px solid rgba(var(--v-theme-on-surface), 0.04);
+  --am-alert-border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+  --am-login-border: 1px solid rgba(var(--v-theme-on-surface), 0.04);
+  --am-btn-toggle-border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+  --am-avatar-border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+  --am-code-block-border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  --am-filter-chip-border: 1px solid rgba(var(--v-theme-on-surface), 0.04);
+  --am-content-border: 1px solid rgba(var(--v-theme-on-surface), 0.05);
+
+  /* ACG */
+  --glass-border: rgba(255, 255, 255, 0.03);
+  --glass-border-raised: rgba(255, 255, 255, 0.04);
+  --glass-border-hover: rgba(255, 255, 255, 0.06);
+
+  /* Liquid */
+  --lg-border: rgba(var(--v-theme-on-surface), 0.04);
+  --lg-border-strong: rgba(var(--v-theme-on-surface), 0.06);
+}
+
+/* ── 默认：不覆盖，保持各主题自身的边框值 ── */
+
+/* ── 明显边框 ── */
+html[data-theme-border='prominent'],
+html[data-theme-border='prominent'] .v-theme--light,
+html[data-theme-border='prominent'] .v-theme--dark {
+  --am-surface-border: 1px solid rgba(var(--v-theme-on-surface), 0.16);
+  --am-overlay-border: 1px solid rgba(var(--v-theme-on-surface), 0.18);
+  --am-nav-border: 1px solid rgba(var(--v-theme-on-surface), 0.16);
+  --am-field-border: 1px solid rgba(var(--v-theme-on-surface), 0.16);
+  --am-btn-border: 1px solid rgba(var(--v-theme-on-surface), 0.18);
+  --am-tab-border: 1px solid rgba(var(--v-theme-on-surface), 0.18);
+  --am-chip-border: 1px solid rgba(var(--v-theme-on-surface), 0.18);
+  --am-snackbar-border: 1px solid rgba(var(--v-theme-on-surface), 0.16);
+  --am-alert-border: 1px solid rgba(var(--v-theme-on-surface), 0.18);
+  --am-login-border: 1px solid rgba(var(--v-theme-on-surface), 0.16);
+  --am-btn-toggle-border: 1px solid rgba(var(--v-theme-on-surface), 0.18);
+  --am-avatar-border: 1px solid rgba(var(--v-theme-on-surface), 0.18);
+  --am-code-block-border: 1px solid rgba(var(--v-theme-on-surface), 0.3);
+  --am-filter-chip-border: 1px solid rgba(var(--v-theme-on-surface), 0.16);
+  --am-content-border: 1px solid rgba(var(--v-theme-on-surface), 0.18);
+
+  /* ACG */
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-raised: rgba(255, 255, 255, 0.18);
+  --glass-border-hover: rgba(255, 255, 255, 0.24);
+
+  /* Liquid */
+  --lg-border: rgba(var(--v-theme-on-surface), 0.14);
+  --lg-border-strong: rgba(var(--v-theme-on-surface), 0.2);
+}
+
+/* ── 强边框 ── */
+html[data-theme-border='dramatic'],
+html[data-theme-border='dramatic'] .v-theme--light,
+html[data-theme-border='dramatic'] .v-theme--dark {
+  --am-surface-border: 2px solid rgba(var(--v-theme-on-surface), 0.25);
+  --am-overlay-border: 2px solid rgba(var(--v-theme-on-surface), 0.28);
+  --am-nav-border: 2px solid rgba(var(--v-theme-on-surface), 0.25);
+  --am-field-border: 2px solid rgba(var(--v-theme-on-surface), 0.25);
+  --am-btn-border: 2px solid rgba(var(--v-theme-on-surface), 0.28);
+  --am-tab-border: 2px solid rgba(var(--v-theme-on-surface), 0.28);
+  --am-chip-border: 2px solid rgba(var(--v-theme-on-surface), 0.28);
+  --am-snackbar-border: 2px solid rgba(var(--v-theme-on-surface), 0.25);
+  --am-alert-border: 2px solid rgba(var(--v-theme-on-surface), 0.28);
+  --am-login-border: 2px solid rgba(var(--v-theme-on-surface), 0.25);
+  --am-btn-toggle-border: 2px solid rgba(var(--v-theme-on-surface), 0.28);
+  --am-avatar-border: 2px solid rgba(var(--v-theme-on-surface), 0.28);
+  --am-code-block-border: 2px solid rgba(var(--v-theme-on-surface), 0.4);
+  --am-filter-chip-border: 2px solid rgba(var(--v-theme-on-surface), 0.25);
+  --am-content-border: 2px solid rgba(var(--v-theme-on-surface), 0.28);
+
+  /* ACG */
+  --glass-border: rgba(255, 255, 255, 0.22);
+  --glass-border-raised: rgba(255, 255, 255, 0.3);
+  --glass-border-hover: rgba(255, 255, 255, 0.38);
+
+  /* Liquid */
+  --lg-border: rgba(var(--v-theme-on-surface), 0.22);
+  --lg-border-strong: rgba(var(--v-theme-on-surface), 0.3);
+}

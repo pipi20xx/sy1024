@@ -1,0 +1,12 @@
+/**
+ * transitions.css — 全局过渡
+ *
+ * 仅处理 visual.css 未覆盖的组件过渡。
+ * .v-card / .v-btn 的过渡已由 visual.css 通过
+ * var(--am-transition) 令牌统一管理。
+ */
+
+.v-list-item,
+.v-chip {
+  transition: var(--am-transition) !important;
+}

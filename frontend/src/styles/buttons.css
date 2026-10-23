@@ -1,0 +1,17 @@
+/**
+ * buttons.css — 按钮纯结构
+ *
+ * 按下缩放、图标圆形。
+ * 所有视觉风格（圆角令牌、背景、模糊、边框、阴影）在
+ * tokens.css + visual.css 中统一处理。
+ */
+
+/* 按下态 — 结构行为 */
+.v-btn:active {
+  transform: scale(0.98);
+}
+
+/* 图标按钮 — 始终圆形（结构规则，不随主题变化） */
+.v-btn--icon {
+  border-radius: 50% !important;
+}

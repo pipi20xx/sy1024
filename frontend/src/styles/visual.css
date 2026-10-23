@@ -1,0 +1,915 @@
+/**
+ * visual.css — 共享组件视觉规则层
+ *
+ * 使用 tokens.css 中定义的设计令牌，对 Vuetify 组件统一应用
+ * 背景/模糊/边框/阴影/圆角等视觉属性。
+ *
+ * 此文件中的规则不带任何主题前缀（html.glass-theme-xxx），
+ * 它们通过 CSS 变量级联自动适应当前激活的主题。
+ *
+ * 主题文件只需覆盖令牌值，无需重复写组件规则。
+ */
+
+/* ============================================================
+ * 1. Surface — 卡片 / 面板
+ * ============================================================ */
+
+.v-card,
+.v-card--variant-elevated,
+.v-card--variant-flat,
+.v-card--variant-tonal {
+  background: var(--am-surface-bg) !important;
+  background-color: var(--am-surface-bg) !important;
+  backdrop-filter: var(--am-surface-blur) !important;
+  -webkit-backdrop-filter: var(--am-surface-blur) !important;
+  border: var(--am-surface-border) !important;
+  box-shadow: var(--am-surface-shadow) !important;
+  border-radius: var(--am-surface-radius) !important;
+  transition: var(--am-transition) !important;
+}
+
+.v-card--variant-outlined {
+  border: var(--am-surface-border) !important;
+}
+
+.v-card--link:hover,
+.v-card[link]:hover {
+  transform: var(--am-surface-hover-transform);
+  box-shadow: var(--am-surface-hover-shadow) !important;
+}
+
+.v-sheet:not(.v-snackbar__wrapper) {
+  background: var(--am-surface-bg) !important;
+  background-color: var(--am-surface-bg) !important;
+  backdrop-filter: var(--am-surface-blur) !important;
+  -webkit-backdrop-filter: var(--am-surface-blur) !important;
+  border: var(--am-surface-border) !important;
+  border-radius: var(--am-surface-radius) !important;
+}
+
+.v-expansion-panel {
+  background: var(--am-surface-bg) !important;
+  background-color: var(--am-surface-bg) !important;
+  backdrop-filter: var(--am-surface-blur) !important;
+  -webkit-backdrop-filter: var(--am-surface-blur) !important;
+  border: var(--am-surface-border) !important;
+  border-radius: var(--am-panel-radius) !important;
+  box-shadow: var(--am-panel-shadow) !important;
+}
+
+/* glass-card 圆角 */
+.v-card.glass-card,
+.v-card--variant-outlined.glass-card {
+  border: var(--am-surface-border) !important;
+  border-radius: var(--glass-radius, var(--am-surface-radius)) !important;
+}
+
+/* liquid-glass-card */
+.liquid-glass-card {
+  position: relative;
+  backdrop-filter: var(--am-surface-blur) !important;
+  -webkit-backdrop-filter: var(--am-surface-blur) !important;
+  border: var(--am-surface-border) !important;
+  /* 跟随主题对话框圆角令牌与圆角档位设置（原为硬编码 24px） */
+  border-radius: var(--am-dialog-radius, 24px) !important;
+  box-shadow: var(--am-surface-shadow) !important;
+  transition: var(--am-transition) !important;
+  overflow: hidden;
+}
+
+/* ============================================================
+ * 2. Overlay — 弹窗 / 下拉菜单 / 浮层
+ * ============================================================ */
+
+.v-dialog > .v-card {
+  border-radius: var(--am-dialog-radius) !important;
+}
+
+.v-dialog .v-card,
+.v-overlay__content .v-card {
+  background: var(--am-overlay-bg) !important;
+  background-color: var(--am-overlay-bg) !important;
+  backdrop-filter: var(--am-overlay-blur) !important;
+  -webkit-backdrop-filter: var(--am-overlay-blur) !important;
+  box-shadow: var(--am-overlay-shadow) !important;
+  border: var(--am-overlay-border) !important;
+}
+
+/* 弹窗内下拉面板 — 继承弹窗背景 */
+.v-dialog .v-card .v-card-text .v-overlay .v-list,
+.v-dialog .v-card .v-card-text .v-menu > .v-list {
+  background: inherit !important;
+  background-color: inherit !important;
+}
+
+/* 下拉菜单面板 */
+.v-menu .v-overlay__content {
+  border-radius: var(--am-menu-radius) !important;
+  overflow: hidden !important;
+}
+
+.v-select .v-overlay__content,
+.v-autocomplete .v-overlay__content,
+.v-combobox .v-overlay__content {
+  border-radius: var(--am-menu-radius) !important;
+  overflow: hidden !important;
+}
+
+.v-overlay .v-list,
+.v-menu .v-card,
+.v-menu .v-list {
+  background: var(--am-overlay-bg) !important;
+  backdrop-filter: var(--am-overlay-blur) !important;
+  -webkit-backdrop-filter: var(--am-overlay-blur) !important;
+  box-shadow: var(--am-overlay-shadow) !important;
+  border: var(--am-overlay-border) !important;
+  border-radius: var(--am-menu-radius) !important;
+}
+
+/* 下拉列表项 */
+.v-select .v-list-item,
+.v-autocomplete .v-list-item,
+.v-combobox .v-list-item,
+.v-menu .v-list-item {
+  border-radius: var(--am-list-item-radius) !important;
+  margin: var(--am-list-item-margin) !important;
+  min-height: var(--am-list-item-min-height) !important;
+  transition: var(--am-transition-fast) !important;
+}
+
+.v-select .v-chip {
+  margin: 2px 4px 2px 0 !important;
+}
+
+.v-select .v-field__append-inner .v-icon {
+  transition: transform 0.3s ease-out !important;
+}
+
+.v-select--active .v-field__append-inner .v-icon {
+  transform: rotate(180deg) !important;
+}
+
+/* 列表项文字 */
+.v-overlay .v-list .v-list-item-title {
+  color: var(--am-list-title) !important;
+}
+
+/* 列表项选中 */
+.v-list-item--active {
+  color: var(--am-list-active-color) !important;
+}
+
+.v-select .v-list-item--active,
+.v-autocomplete .v-list-item--active,
+.v-combobox .v-list-item--active,
+.v-menu .v-list-item--active {
+  color: var(--am-list-active-color) !important;
+}
+
+/* 下拉面板输入框文字 */
+.v-select .v-field__input,
+.v-autocomplete .v-field__input,
+.v-combobox .v-field__input {
+  color: var(--am-input-text) !important;
+}
+
+/* 下拉箭头颜色 */
+.v-select .v-field__append-inner .v-icon {
+  color: var(--am-dropdown-arrow) !important;
+}
+
+/* 多选 chips */
+.v-select .v-chip--variant-tonal {
+  color: var(--am-list-active-color) !important;
+}
+
+/* ============================================================
+ * 3. Scrim — 遮罩
+ * ============================================================ */
+
+.v-dialog > .v-overlay__scrim {
+  backdrop-filter: var(--am-scrim-blur) !important;
+  -webkit-backdrop-filter: var(--am-scrim-blur) !important;
+  background: var(--am-scrim-bg) !important;
+}
+
+/* snackbar / menu 等非对话框 overlay 的 scrim 隐藏 */
+.v-overlay:not(.v-dialog) > .v-overlay__scrim {
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+/* loading 遮罩 */
+.v-skeleton-loader,
+.v-dialog.v-overlay--active > .v-overlay__scrim {
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
+/* ============================================================
+ * 4. Nav — 侧边栏 / 顶栏 / 工具栏
+ * ============================================================ */
+
+.v-navigation-drawer,
+.v-app-bar,
+.v-toolbar {
+  background: var(--am-nav-bg) !important;
+  background-color: var(--am-nav-bg) !important;
+  backdrop-filter: var(--am-nav-blur) !important;
+  -webkit-backdrop-filter: var(--am-nav-blur) !important;
+  border: var(--am-nav-border) !important;
+  box-shadow: var(--am-nav-shadow) !important;
+}
+
+/* 导航激活色 */
+.v-navigation-drawer .v-list-item--active .v-list-item-title {
+  font-weight: 600;
+  color: var(--am-nav-active-color) !important;
+}
+
+.v-navigation-drawer .v-list-item--active .v-icon {
+  color: var(--am-nav-active-color) !important;
+}
+
+.v-navigation-drawer .v-list-item--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  bottom: 25%;
+  width: var(--am-nav-indicator-width);
+  border-radius: var(--am-nav-indicator-radius);
+  background: var(--am-nav-indicator-bg);
+}
+
+/* ============================================================
+ * 5. Field — 输入框
+ * ============================================================ */
+
+.v-field--variant-outlined {
+  background: var(--am-field-bg) !important;
+  border-radius: var(--am-field-radius) !important;
+  box-shadow: var(--am-field-shadow) !important;
+  border: var(--am-field-border) !important;
+}
+
+.v-field--variant-outlined .v-field__outline {
+  --v-field-border-opacity: var(--am-field-outline-opacity) !important;
+}
+
+.v-field--variant-outlined:hover .v-field__outline {
+  --v-field-border-opacity: var(--am-field-outline-opacity) !important;
+}
+
+.v-field--variant-outlined.v-field--focused .v-field__outline {
+  --v-field-border-opacity: var(--am-field-outline-opacity) !important;
+  color: var(--am-field-focus-outline-color) !important;
+}
+
+.v-field--variant-outlined.v-field--focused {
+  box-shadow: var(--am-field-focus-shadow) !important;
+}
+
+/* label 和文字 */
+.v-field .v-label {
+  color: var(--am-label-color) !important;
+}
+
+.v-field--focused .v-label {
+  color: var(--am-label-focus-color) !important;
+}
+
+.v-field__input {
+  color: var(--am-input-text) !important;
+}
+
+.v-input input,
+.v-input textarea {
+  color: var(--am-input-text) !important;
+}
+
+/* filled */
+.v-field--variant-filled {
+  background: var(--am-field-bg) !important;
+  border-radius: var(--am-field-radius) var(--am-field-radius) 0 0 !important;
+  border: var(--am-field-border) !important;
+}
+
+/* solo */
+.v-field--variant-solo {
+  background: var(--am-field-bg) !important;
+  border-radius: var(--am-field-radius) !important;
+  box-shadow: var(--am-field-shadow) !important;
+  border: var(--am-field-border) !important;
+}
+
+/* solo-filled */
+.v-field--variant-solo-filled {
+  background: var(--am-field-bg) !important;
+  border-radius: var(--am-field-radius) !important;
+  border: var(--am-field-border) !important;
+}
+
+/* solo-inverted */
+.v-field--variant-solo-inverted {
+  background: var(--am-field-bg) !important;
+}
+
+/* underlined */
+.v-field--variant-underlined {
+  background: var(--am-field-bg) !important;
+}
+
+/* plain */
+.v-field--variant-plain {
+  background: var(--am-field-bg) !important;
+}
+
+/* Autocomplete / Combobox 聚焦 */
+.v-autocomplete .v-field--variant-outlined.v-field--focused,
+.v-combobox .v-field--variant-outlined.v-field--focused {
+  box-shadow: var(--am-field-focus-shadow) !important;
+}
+
+/* 全局 focus 光环 */
+.v-field--focused {
+  box-shadow: var(--am-field-focus-shadow) !important;
+}
+
+/* ============================================================
+ * 6. Divider — 分割线
+ * ============================================================ */
+
+.v-divider {
+  border-color: var(--am-divider-color) !important;
+}
+
+/* ============================================================
+ * 7. Tab — 标签页
+ * ============================================================ */
+
+.v-tabs .v-slide-group,
+.v-tabs .v-slide-group__wrapper,
+.v-tabs .v-slide-group__content {
+  background: transparent !important;
+}
+
+.v-tabs .v-slide-group__content {
+  gap: var(--am-tab-gap) !important;
+}
+
+.v-tab__slider {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+.v-tab {
+  background: var(--am-tab-bg) !important;
+  backdrop-filter: var(--am-tab-blur) !important;
+  -webkit-backdrop-filter: var(--am-tab-blur) !important;
+  border: var(--am-tab-border) !important;
+  box-shadow: var(--am-tab-shadow) !important;
+  border-radius: var(--am-tab-radius) !important;
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+}
+
+.v-tab--selected {
+  color: var(--am-tab-active-color) !important;
+  font-weight: var(--am-tab-active-weight) !important;
+}
+
+.v-tab:not(.v-tab--selected) {
+  color: var(--am-tab-inactive-color) !important;
+}
+
+.v-tab:not(.v-tab--selected):hover {
+  color: var(--am-tab-hover-color) !important;
+}
+
+/* ============================================================
+ * 8. Button — 按钮
+ * ============================================================ */
+
+.v-btn--variant-flat {
+  background: var(--am-btn-bg) !important;
+  backdrop-filter: var(--am-btn-blur) !important;
+  -webkit-backdrop-filter: var(--am-btn-blur) !important;
+  border: var(--am-btn-border) !important;
+  border-radius: var(--am-btn-radius) !important;
+  color: var(--am-btn-text-color) !important;
+  font-weight: var(--am-btn-font-weight);
+  transition: var(--am-transition) !important;
+}
+
+.v-btn--variant-flat:hover {
+  background: var(--am-btn-hover-bg) !important;
+  box-shadow: var(--am-btn-hover-shadow) !important;
+}
+
+/* tonal 无 color — 用主题中性背景 */
+.v-btn--variant-tonal:not(.text-primary):not(.v-btn--bg-primary):not(.text-info):not(.v-btn--bg-info):not(.text-success):not(.v-btn--bg-success):not(.text-warning):not(.v-btn--bg-warning):not(.text-error):not(.v-btn--bg-error):not(.text-secondary):not(.v-btn--bg-secondary):not(.text-accent):not(.v-btn--bg-accent) {
+  background: var(--am-btn-bg) !important;
+  backdrop-filter: var(--am-btn-blur) !important;
+  -webkit-backdrop-filter: var(--am-btn-blur) !important;
+  border: var(--am-btn-border) !important;
+  border-radius: var(--am-btn-radius) !important;
+  font-weight: 500;
+  transition: var(--am-transition) !important;
+}
+
+/* tonal 有 color — 只保留结构性样式，让 Vuetify 根据 color 计算 tonal 背景色 */
+.v-btn--variant-tonal.text-primary,
+.v-btn--variant-tonal.v-btn--bg-primary,
+.v-btn--variant-tonal.text-info,
+.v-btn--variant-tonal.v-btn--bg-info,
+.v-btn--variant-tonal.text-success,
+.v-btn--variant-tonal.v-btn--bg-success,
+.v-btn--variant-tonal.text-warning,
+.v-btn--variant-tonal.v-btn--bg-warning,
+.v-btn--variant-tonal.text-error,
+.v-btn--variant-tonal.v-btn--bg-error,
+.v-btn--variant-tonal.text-secondary,
+.v-btn--variant-tonal.v-btn--bg-secondary,
+.v-btn--variant-tonal.text-accent,
+.v-btn--variant-tonal.v-btn--bg-accent {
+  backdrop-filter: var(--am-btn-blur) !important;
+  -webkit-backdrop-filter: var(--am-btn-blur) !important;
+  border: var(--am-btn-border) !important;
+  border-radius: var(--am-btn-radius) !important;
+  font-weight: 500;
+  transition: var(--am-transition) !important;
+}
+
+/* tonal 无 color — hover 用主题背景 */
+.v-btn--variant-tonal:not(.text-primary):not(.v-btn--bg-primary):not(.text-info):not(.v-btn--bg-info):not(.text-success):not(.v-btn--bg-success):not(.text-warning):not(.v-btn--bg-warning):not(.text-error):not(.v-btn--bg-error):not(.text-secondary):not(.v-btn--bg-secondary):not(.text-accent):not(.v-btn--bg-accent):hover {
+  background: var(--am-btn-hover-bg) !important;
+  box-shadow: var(--am-btn-hover-shadow) !important;
+}
+
+/* tonal 有 color — hover 只加阴影，背景由 Vuetify 计算 */
+.v-btn--variant-tonal:hover {
+  box-shadow: var(--am-btn-hover-shadow) !important;
+}
+
+.v-btn--variant-outlined {
+  background: var(--am-btn-outlined-bg) !important;
+  backdrop-filter: var(--am-btn-blur) !important;
+  -webkit-backdrop-filter: var(--am-btn-blur) !important;
+  border: var(--am-btn-border) !important;
+  border-radius: var(--am-btn-radius) !important;
+  transition: var(--am-transition) !important;
+}
+
+.v-btn--variant-outlined:hover {
+  background: var(--am-btn-outlined-hover-bg) !important;
+  box-shadow: var(--am-btn-hover-shadow) !important;
+}
+
+/* flat + primary */
+.v-btn--variant-flat.bg-primary,
+.v-btn--variant-flat.v-btn--bg-primary,
+.v-btn--variant-flat.text-primary {
+  background: var(--am-btn-primary-bg) !important;
+  background-color: var(--am-btn-primary-bg) !important;
+  backdrop-filter: var(--am-btn-blur) !important;
+  -webkit-backdrop-filter: var(--am-btn-blur) !important;
+  color: var(--am-btn-primary-color) !important;
+  border: var(--am-btn-border) !important;
+}
+
+/* flat + success */
+.v-btn--variant-flat.bg-success,
+.v-btn--variant-flat.v-btn--bg-success {
+  background: var(--am-btn-success-bg) !important;
+  backdrop-filter: var(--am-btn-blur) !important;
+  -webkit-backdrop-filter: var(--am-btn-blur) !important;
+  color: var(--am-btn-success-color) !important;
+  border: var(--am-btn-border) !important;
+}
+
+/* flat + warning */
+.v-btn--variant-flat.bg-warning,
+.v-btn--variant-flat.v-btn--bg-warning {
+  background: var(--am-btn-warning-bg) !important;
+  backdrop-filter: var(--am-btn-blur) !important;
+  -webkit-backdrop-filter: var(--am-btn-blur) !important;
+  color: var(--am-btn-warning-color) !important;
+  border: var(--am-btn-border) !important;
+}
+
+/* flat + error */
+.v-btn--variant-flat.bg-error,
+.v-btn--variant-flat.v-btn--bg-error {
+  background: var(--am-btn-error-bg) !important;
+  backdrop-filter: var(--am-btn-blur) !important;
+  -webkit-backdrop-filter: var(--am-btn-blur) !important;
+  color: var(--am-btn-error-color) !important;
+  border: var(--am-btn-border) !important;
+}
+
+/* 图标按钮 */
+.v-btn--icon {
+  transition: all 0.3s ease-out !important;
+  border-radius: 50% !important;
+}
+
+.v-btn--icon:hover {
+  transform: scale(1.08);
+}
+
+.v-btn--icon:active {
+  transform: scale(0.95);
+}
+
+/* 禁用态 */
+.v-btn--disabled,
+.v-input--disabled {
+  opacity: var(--am-disabled-opacity) !important;
+}
+
+/* ============================================================
+ * 9. Chip — 芯片
+ * ============================================================ */
+
+.v-chip {
+  font-weight: 500;
+  border-radius: var(--am-chip-radius) !important;
+}
+
+.v-chip--variant-tonal {
+  backdrop-filter: var(--am-chip-blur) !important;
+  -webkit-backdrop-filter: var(--am-chip-blur) !important;
+}
+
+.v-chip {
+  border-color: var(--am-chip-border) !important;
+}
+
+/* color-mix: 保留类型色相 */
+@supports (background: color-mix(in srgb, red 10%, transparent)) {
+  .v-chip--variant-tonal {
+    background-color: color-mix(in srgb, currentColor 18%, var(--am-surface-bg)) !important;
+    border-color: color-mix(in srgb, currentColor 35%, transparent) !important;
+  }
+
+  .v-alert--variant-tonal {
+    background-color: color-mix(in srgb, currentColor 14%, var(--am-surface-bg)) !important;
+  }
+
+  .v-snackbar__wrapper {
+    background-color: color-mix(in srgb, currentColor 16%, var(--am-overlay-bg)) !important;
+  }
+}
+
+/* ============================================================
+ * 10. Snackbar — 通知条
+ * ============================================================ */
+
+.v-snackbar__wrapper {
+  background: var(--am-snackbar-bg) !important;
+  background-color: var(--am-snackbar-bg) !important;
+  backdrop-filter: var(--am-snackbar-blur) !important;
+  -webkit-backdrop-filter: var(--am-snackbar-blur) !important;
+  box-shadow: var(--am-snackbar-shadow) !important;
+  border: var(--am-snackbar-border) !important;
+  border-radius: var(--am-snackbar-radius) !important;
+}
+
+.v-snackbar__wrapper,
+.v-snackbar__wrapper .v-btn {
+  color: var(--am-snackbar-text) !important;
+}
+
+/* ============================================================
+ * 11. Alert — 警告框
+ * ============================================================ */
+
+.v-alert--variant-tonal {
+  backdrop-filter: var(--am-alert-blur) !important;
+  -webkit-backdrop-filter: var(--am-alert-blur) !important;
+  border: var(--am-alert-border) !important;
+}
+
+/* ============================================================
+ * 12. Switch / Checkbox / Radio / Slider / Progress / BtnToggle
+ * ============================================================ */
+
+/* Switch */
+.v-switch .v-switch__track {
+  border-radius: 999px !important;
+  opacity: 1 !important;
+  background: var(--am-switch-track-bg) !important;
+}
+
+.v-switch .v-selection-control--dirty .v-switch__track {
+  background: var(--am-switch-track-active-bg) !important;
+  opacity: 1 !important;
+}
+
+.v-switch .v-switch__thumb {
+  background: var(--am-switch-thumb-bg) !important;
+  box-shadow: var(--am-switch-thumb-shadow) !important;
+}
+
+/* Checkbox — 选中态：主题色实心方框 + 白色√
+   mdi-checkbox-marked 字体图标是单色的，color 同时控制方框和√。
+   方案：隐藏原图标，用 background 双层模拟——
+   底层主题色方框 + 上层白色√(mask)。 */
+.v-checkbox .v-selection-control--dirty .v-checkbox-btn__icon,
+.v-checkbox .v-selection-control--dirty .v-icon {
+  color: var(--am-check-active-color) !important;
+  background-color: var(--am-check-active-color) !important;
+  border-radius: 2px;
+  position: relative;
+}
+
+/* 用伪元素叠加白色√ — 使用 MDI check 填充版 path */
+.v-checkbox .v-selection-control--dirty .v-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: #fff;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z'/%3E%3C/svg%3E") center / 75% 75% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z'/%3E%3C/svg%3E") center / 75% 75% no-repeat;
+}
+
+/* Radio — 选中态圆点用主题色 */
+.v-radio .v-selection-control--dirty .v-radio-btn__icon,
+.v-radio .v-selection-control--dirty .v-icon {
+  color: var(--am-check-active-color) !important;
+}
+
+/* Checkbox/Radio 未选态 */
+.v-checkbox .v-selection-control:not(.v-selection-control--dirty) .v-icon,
+.v-radio .v-selection-control:not(.v-selection-control--dirty) .v-icon {
+  color: var(--am-check-inactive-color) !important;
+}
+
+/* BtnToggle */
+.v-btn-toggle {
+  border: var(--am-btn-toggle-border) !important;
+  border-radius: var(--am-btn-toggle-radius) !important;
+}
+
+.v-btn-toggle .v-btn {
+  color: rgb(var(--v-theme-on-surface)) !important;
+}
+
+.v-btn-toggle .v-btn--active {
+  background: var(--am-btn-toggle-active-bg) !important;
+  color: var(--am-btn-toggle-active-color) !important;
+}
+
+/* Slider */
+.v-slider .v-slider-track {
+  background: var(--am-slider-track-bg) !important;
+}
+
+.v-slider .v-slider-track__fill {
+  background: var(--am-slider-fill-bg) !important;
+}
+
+.v-slider .v-slider-thumb__surface {
+  background: var(--am-slider-thumb-bg) !important;
+  box-shadow: var(--am-slider-thumb-shadow) !important;
+}
+
+/* Progress Linear */
+.v-progress-linear__determinate {
+  background: var(--am-progress-fill-bg) !important;
+  box-shadow: var(--am-progress-glow);
+}
+
+/* Progress Circular */
+.v-progress-circular__overlay {
+  stroke: var(--am-progress-circular-stroke) !important;
+}
+
+/* Avatar */
+.v-avatar--variant-tonal {
+  backdrop-filter: var(--am-avatar-blur) !important;
+  -webkit-backdrop-filter: var(--am-avatar-blur) !important;
+}
+
+.liquid-avatar {
+  backdrop-filter: var(--am-avatar-blur) !important;
+  -webkit-backdrop-filter: var(--am-avatar-blur) !important;
+  border: var(--am-avatar-border) !important;
+  color: var(--am-avatar-color) !important;
+  transition: all 0.5s ease-out;
+}
+
+.liquid-avatar:hover {
+  box-shadow: 0 0 16px rgba(var(--v-theme-primary), 0.3) !important;
+}
+
+/* Tooltip */
+.v-tooltip .v-overlay__content {
+  backdrop-filter: var(--am-tooltip-blur) !important;
+  -webkit-backdrop-filter: var(--am-tooltip-blur) !important;
+}
+
+/* ============================================================
+ * 14. Table — 表格
+ * ============================================================ */
+
+.v-table,
+.v-data-table {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.v-table .v-table__wrapper tr:hover,
+.v-data-table__tr:hover,
+.v-data-table .v-data-table__tr:hover {
+  background: var(--am-table-hover-bg) !important;
+}
+
+.v-table thead tr,
+.v-data-table thead tr {
+  background: var(--am-table-header-bg) !important;
+}
+
+/* 表头文字与内容行保持一致的全亮度（去掉 Vuetify 默认的 medium-emphasis 弱化） */
+.v-table thead tr th,
+.v-data-table thead tr th {
+  color: rgb(var(--v-theme-on-surface)) !important;
+}
+
+/* ============================================================
+ * 16. Hover Lift
+ * ============================================================ */
+
+.hover-lift {
+  cursor: pointer;
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out !important;
+}
+
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--am-hover-lift-shadow) !important;
+}
+
+/* ============================================================
+ * 17. Code / Search Results / Misc
+ * ============================================================ */
+
+code {
+  padding: 2px 6px;
+  border-radius: var(--am-code-radius);
+  font-size: 0.85em;
+}
+
+/* 日志级别颜色令牌（--am-log-*，tokens.css 各主题块提供）由 LogTerminal 组件直接消费 */
+
+.glass-btn {
+  transition: all 0.5s ease-out !important;
+}
+
+/* 强调按钮（LoginView / SettingsView 等），
+   亮色主题覆盖见第 4 层 sytmdb-pages.css */
+.glass-btn-accent {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(255, 45, 146, 0.25)) !important;
+  backdrop-filter: blur(40px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  transition: all 0.5s ease-out !important;
+}
+
+.glass-btn-accent:hover {
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.35) !important;
+}
+
+/* ============================================================
+ * 18. Body Background — 背景层
+ * ============================================================ */
+
+body::before {
+  background: var(--am-body-before-bg);
+  background-image: var(--am-body-before-image);
+  filter: var(--am-body-before-filter);
+  transform: var(--am-body-before-transform);
+}
+
+body::after {
+  background: var(--am-body-after-bg);
+}
+
+body {
+  background: var(--am-body-bg) !important;
+}
+
+/* ============================================================
+ * 19. Chip Size — 芯片尺寸
+ * ============================================================ */
+
+.v-chip--size-x-small {
+  font-size: 0.75rem !important;
+  min-height: 24px !important;
+  padding: 0 8px !important;
+}
+
+.v-chip--size-x-small .v-chip__content {
+  font-size: 0.75rem !important;
+}
+
+/* ============================================================
+ * 20. Scrollbar — 滚动条
+ *    统一风格，区分主区域(8px)和子区域(6px)两种宽度
+ * ============================================================ */
+
+/* Firefox — 所有可滚动区域统一 */
+html, body, .v-main, .v-main__scroller,
+.v-navigation-drawer, .v-navigation-drawer .v-navigation-drawer__content, .v-navigation-drawer .v-list,
+.v-dialog .v-card-text,
+.v-select .v-list, .v-autocomplete .v-list, .v-combobox .v-list, .v-menu .v-list,
+.log-viewport {
+  scrollbar-width: thin;
+  scrollbar-color: var(--am-scrollbar-color) transparent;
+}
+
+/* WebKit — 主区域滚动条 (8px / radius 4px) */
+html::-webkit-scrollbar, body::-webkit-scrollbar,
+.v-main::-webkit-scrollbar, .v-main__scroller::-webkit-scrollbar {
+  width: var(--am-scrollbar-width);
+}
+html::-webkit-scrollbar-track, body::-webkit-scrollbar-track,
+.v-main::-webkit-scrollbar-track, .v-main__scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb,
+.v-main::-webkit-scrollbar-thumb, .v-main__scroller::-webkit-scrollbar-thumb {
+  background: var(--am-scrollbar-color);
+  border-radius: var(--am-scrollbar-radius);
+}
+html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover,
+.v-main::-webkit-scrollbar-thumb:hover, .v-main__scroller::-webkit-scrollbar-thumb:hover {
+  background: var(--am-scrollbar-hover);
+}
+
+/* WebKit — 子区域滚动条 (6px / radius 3px) */
+.v-navigation-drawer::-webkit-scrollbar,
+.v-navigation-drawer .v-navigation-drawer__content::-webkit-scrollbar,
+.v-navigation-drawer .v-list::-webkit-scrollbar,
+.v-dialog .v-card-text::-webkit-scrollbar,
+.v-select .v-list::-webkit-scrollbar, .v-autocomplete .v-list::-webkit-scrollbar,
+.v-combobox .v-list::-webkit-scrollbar, .v-menu .v-list::-webkit-scrollbar,
+.log-viewport::-webkit-scrollbar::-webkit-scrollbar {
+  width: var(--am-scrollbar-nav-width);
+}
+.v-navigation-drawer::-webkit-scrollbar-track,
+.v-navigation-drawer .v-navigation-drawer__content::-webkit-scrollbar-track,
+.v-navigation-drawer .v-list::-webkit-scrollbar-track,
+.v-dialog .v-card-text::-webkit-scrollbar-track,
+.v-select .v-list::-webkit-scrollbar-track, .v-autocomplete .v-list::-webkit-scrollbar-track,
+.v-combobox .v-list::-webkit-scrollbar-track, .v-menu .v-list::-webkit-scrollbar-track,
+.log-viewport::-webkit-scrollbar-track::-webkit-scrollbar-track {
+  background: transparent;
+}
+.v-navigation-drawer::-webkit-scrollbar-thumb,
+.v-navigation-drawer .v-navigation-drawer__content::-webkit-scrollbar-thumb,
+.v-navigation-drawer .v-list::-webkit-scrollbar-thumb,
+.v-dialog .v-card-text::-webkit-scrollbar-thumb,
+.v-select .v-list::-webkit-scrollbar-thumb, .v-autocomplete .v-list::-webkit-scrollbar-thumb,
+.v-combobox .v-list::-webkit-scrollbar-thumb, .v-menu .v-list::-webkit-scrollbar-thumb,
+.log-viewport::-webkit-scrollbar-thumb::-webkit-scrollbar-thumb {
+  background: var(--am-scrollbar-color);
+  border-radius: var(--am-scrollbar-nav-radius);
+}
+.v-navigation-drawer::-webkit-scrollbar-thumb:hover,
+.v-navigation-drawer .v-navigation-drawer__content::-webkit-scrollbar-thumb:hover,
+.v-navigation-drawer .v-list::-webkit-scrollbar-thumb:hover,
+.v-dialog .v-card-text::-webkit-scrollbar-thumb:hover,
+.v-select .v-list::-webkit-scrollbar-thumb:hover, .v-autocomplete .v-list::-webkit-scrollbar-thumb:hover,
+.v-combobox .v-list::-webkit-scrollbar-thumb:hover, .v-menu .v-list::-webkit-scrollbar-thumb:hover,
+.log-viewport::-webkit-scrollbar-thumb:hover::-webkit-scrollbar-thumb:hover {
+  background: var(--am-scrollbar-hover);
+}
+
+/* 弹窗内含日志视口（LogTerminal）时，隐藏 v-card-text 的滚动条 */
+.v-dialog .v-card-text:has(.log-viewport) {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+}
+.v-dialog .v-card-text:has(.log-viewport)::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* auto-grow 的 textarea 高度始终等于内容高度，垂直滚动条永不需要；
+   某些缩放级别下亚像素偏差会导致多余滚动条，直接隐藏 */
+.v-textarea .v-field__field textarea {
+  overflow-y: hidden !important;
+}
+
+/* ============================================================
+ * 21. Reduced Motion
+ * ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "movie": {
+    "title": { "source": "title", "description": "电影标题" },
+    "original_title": { "source": "original_title", "description": "原始标题" },
+    "original_language": { "source": "original_language", "description": "原始语言" },
+    "overview": { "source": "overview", "description": "剧情简介" },
+    "release_date": { "source": "release_date", "description": "上映日期" },
+    "status": { "source": "status", "description": "发布状态 (如: Released)" },
+    "runtime": { "source": "runtime", "description": "时长 (分钟)" },
+    "budget": { "source": "budget", "description": "预算" },
+    "revenue": { "source": "revenue", "description": "票房/收入" },
+    "homepage": { "source": "homepage", "description": "官方主页链接" },
+    "imdb_id": { "source": "imdb_id", "description": "IMDB 数据库 ID" },
+    "tagline": { "source": "tagline", "description": "宣传标语" },
+    "popularity": { "source": "popularity", "description": "TMDB 热度值" },
+    "vote_average": { "source": "vote_average", "description": "平均评分" },
+    "vote_count": { "source": "vote_count", "description": "评分人数" },
+    "adult": { "source": "adult", "description": "是否为成人内容" },
+    "video": { "source": "video", "description": "是否有视频" },
+    "poster_path": { "source": "poster_path", "description": "海报图片路径" },
+    "backdrop_path": { "source": "backdrop_path", "description": "背景图片路径" },
+    "genres": { "source": "genres", "description": "电影类型列表" },
+    "production_companies": { "source": "production_companies", "description": "制作公司列表" },
+    "production_countries": { "source": "production_countries", "description": "制作国家列表" },
+    "spoken_languages": { "source": "spoken_languages", "description": "对白语言列表" },
+    "casts": {
+      "source": "credits",
+      "description": "演职员表 (包含演员和工作人员)",
+      "type": "complex_copy",
+      "mapping": {
+        "cast": "cast",
+        "crew": "crew"
+      }
+    },
+    "releases": {
+      "source": "release_dates",
+      "description": "详细分级和上映信息",
+      "type": "transform_releases"
+    },
+    "trailers": {
+      "source": "videos",
+      "description": "预告片和其他视频链接",
+      "type": "transform_trailers"
+    },
+    "keywords": {
+      "source": "keywords",
+      "description": "关键词/标签",
+      "type": "transform_keywords"
+    }
+  },
+  "tv": {
+    "name": { "source": "name", "description": "剧集名称" },
+    "original_name": { "source": "original_name", "description": "原始名称" },
+    "original_language": { "source": "original_language", "description": "原始语言" },
+    "overview": { "source": "overview", "description": "剧情简介" },
+    "tagline": { "source": "tagline", "description": "宣传标语" },
+    "first_air_date": { "source": "first_air_date", "description": "首播日期" },
+    "last_air_date": { "source": "last_air_date", "description": "最新播出日期" },
+    "status": { "source": "status", "description": "剧集状态 (如: Ended, Returning Series)" },
+    "homepage": { "source": "homepage", "description": "官方主页链接" },
+    "type": { "source": "type", "description": "剧集类型 (如: Scripted)" },
+    "in_production": { "source": "in_production", "description": "是否仍在制作中" },
+    "number_of_episodes": { "source": "number_of_episodes", "description": "总集数" },
+    "number_of_seasons": { "source": "number_of_seasons", "description": "总季数" },
+    "vote_average": { "source": "vote_average", "description": "平均评分" },
+    "vote_count": { "source": "vote_count", "description": "评分人数" },
+    "popularity": { "source": "popularity", "description": "TMDB 热度值" },
+    "poster_path": { "source": "poster_path", "description": "海报图片路径" },
+    "backdrop_path": { "source": "backdrop_path", "description": "背景图片路径" },
+    "genres": { "source": "genres", "description": "类型列表" },
+    "production_companies": { "source": "production_companies", "description": "制作公司列表" },
+    "production_countries": { "source": "production_countries", "description": "制作国家列表" },
+    "spoken_languages": { "source": "spoken_languages", "description": "对白语言列表" },
+    "languages": { "source": "languages", "description": "语言列表 (Languages)" },
+    "created_by": { "source": "created_by", "description": "主创人员" },
+    "networks": { "source": "networks", "description": "首播平台/电视网" },
+    "keywords": {
+      "source": "keywords",
+      "description": "关键词/标签",
+      "type": "transform_keywords"
+    },
+    "credits": {
+      "source": "credits",
+      "description": "演职员表 (包含演员和工作人员)",
+      "type": "complex_copy",
+      "mapping": {
+        "cast": "cast",
+        "crew": "crew"
+      }
+    },
+    "trailers": {
+      "source": "videos",
+      "description": "预告片和其他视频链接",
+      "type": "transform_trailers"
+    }
+  },
+  "season": {
+    "id": { "source": "id", "description": "TMDB 内部季 ID" },
+    "name": { "source": "name", "description": "季名称" },
+    "overview": { "source": "overview", "description": "本季简介" },
+    "air_date": { "source": "air_date", "description": "本季首播日期" },
+    "season_number": { "source": "season_number", "description": "季号" },
+    "poster_path": { "source": "poster_path", "description": "本季海报路径" },
+    "vote_average": { "source": "vote_average", "description": "本季平均评分" },
+    "external_ids": {
+      "source": "external_ids",
+      "description": "外部数据库 ID",
+      "type": "complex_copy",
+      "mapping": {
+        "imdb_id": "imdb_id",
+        "tvdb_id": "tvdb_id",
+        "tvrage_id": "tvrage_id"
+      }
+    },
+    "credits": {
+      "source": "credits",
+      "description": "本季特定演职员表",
+      "type": "complex_copy",
+      "mapping": {
+        "cast": "cast",
+        "crew": "crew"
+      }
+    },
+    "trailers": {
+      "source": "videos",
+      "description": "本季相关视频",
+      "type": "transform_trailers"
+    }
+  },
+  "episode": {
+    "id": { "source": "id", "description": "TMDB 单集 ID" },
+    "name": { "source": "name", "description": "单集名称" },
+    "overview": { "source": "overview", "description": "单集简介" },
+    "air_date": { "source": "air_date", "description": "单集播出日期" },
+    "production_code": { "source": "production_code", "description": "制作代码" },
+    "season_number": { "source": "season_number", "description": "所属季号" },
+    "episode_number": { "source": "episode_number", "description": "集号" },
+    "vote_average": { "source": "vote_average", "description": "单集评分" },
+    "vote_count": { "source": "vote_count", "description": "单集评分人数" },
+    "still_path": { "source": "still_path", "description": "单集剧照路径" },
+    "runtime": { "source": "runtime", "description": "单集时长 (分钟)" },
+    "external_ids": {
+      "source": "external_ids",
+      "description": "外部数据库 ID",
+      "type": "complex_copy",
+      "mapping": {
+        "imdb_id": "imdb_id",
+        "tvdb_id": "tvdb_id",
+        "tvrage_id": "tvrage_id"
+      }
+    },
+    "credits": {
+      "source": "credits",
+      "description": "单集演职员 (包含客串演员)",
+      "type": "complex_copy",
+      "mapping": {
+        "cast": "cast",
+        "guest_stars": "guest_stars",
+        "crew": "crew"
+      }
+    },
+    "trailers": {
+      "source": "videos",
+      "description": "单集相关视频",
+      "type": "transform_trailers"
+    }
+  }
+}

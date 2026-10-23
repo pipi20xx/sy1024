@@ -1,0 +1,19 @@
+/**
+ * components.css — Vuetify 组件结构覆盖
+ *
+ * 只放纯结构规则：列表内边距等。
+ * 所有视觉风格（圆角、边框、背景、模糊、阴影、过渡）
+ * 由 tokens.css + visual.css 统一处理。
+ */
+
+
+/* ============================================================
+ * 下拉菜单 — 列表内边距（纯结构，visual.css 未覆盖）
+ * ============================================================ */
+
+.v-select .v-list,
+.v-autocomplete .v-list,
+.v-combobox .v-list,
+.v-menu .v-list {
+  padding: 6px !important;
+}

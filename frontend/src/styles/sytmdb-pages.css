@@ -1,0 +1,417 @@
+/* ============================================================
+ * sytmdb 专属页面样式补充层
+ *
+ * 主题体系与全局视觉规则来自 Anime-Manager 移植的分层样式
+ * （base / tokens / visual / pages / glass 等），本文件只保留
+ * sytmdb 模板仍在使用、而移植样式未覆盖的页面级类。
+ *
+ * 亮暗选择器统一使用 html.glass-light / html.glass-dark
+ * （由 App.vue 在 <html> 上同步，与主题体系一致）。
+ * ============================================================ */
+
+/* ── 品牌色文字（青色强调 / 亮色紫色）— ConfirmDialog ── */
+.text-accent-gold {
+  color: #4ecdc4 !important;
+}
+
+html.glass-light .text-accent-gold {
+  color: #7c3aed !important;
+}
+
+/* ── Liquid Glass 副标题 — DefaultLayout ── */
+.liquid-glass-subtitle {
+  color: rgb(255, 255, 255);
+  text-shadow: 0 0 20px rgba(78, 205, 196, 0.6), 0 0 40px rgba(78, 205, 196, 0.3), 2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+html.glass-light .liquid-glass-subtitle {
+  color: rgb(0, 0, 0) !important;
+  text-shadow: none;
+}
+
+/* ── 强调按钮 — LoginView 等 ──
+   基础样式统一管理在 visual.css §17（.glass-btn-accent），
+   此处只保留亮色主题覆盖。 */
+html.glass-light .glass-btn-accent {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(255, 45, 146, 0.1)) !important;
+  color: #7c3aed !important;
+}
+
+/* ── 合并表格 — ActorsView ── */
+.merge-table th {
+  font-weight: 600;
+  white-space: nowrap;
+  color: rgb(255, 255, 255);
+  text-shadow: 0 0 8px rgba(78, 205, 196, 0.2);
+}
+
+html.glass-light .merge-table th {
+  color: rgb(0, 0, 0) !important;
+  text-shadow: none;
+}
+
+/* ── 日志窗口（旧版兼容，BangumiView 等）── */
+.log-window {
+  overflow-y: auto;
+  border-radius: var(--am-surface-radius, 16px);
+  max-height: 500px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+html.glass-light .log-window {
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+
+/* ── 登录页背景装饰光源 — LoginView ── */
+.login-light-wells {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 500px 400px at 80% 20%, rgba(78, 205, 196, 0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at 15% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 200px at 50% 50%, rgba(255, 45, 146, 0.06) 0%, transparent 70%);
+  animation: login-breathe 8s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 0;
+}
+
+html.glass-light .login-light-wells {
+  background:
+    radial-gradient(ellipse 500px 400px at 80% 20%, rgba(168, 85, 247, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at 15% 80%, rgba(78, 205, 196, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 300px 200px at 50% 50%, rgba(255, 45, 146, 0.04) 0%, transparent 70%);
+}
+
+@keyframes login-breathe {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}@media (prefers-reduced-motion: reduce) {
+  .login-light-wells {
+    animation: none;
+  }
+}
+
+/* ── 媒体卡片 — MediaCard ── */
+.media-liquid-card {
+  transition: all 0.5s ease-out !important;
+  overflow: hidden;
+}
+
+.media-liquid-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+html.glass-light .media-liquid-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+}
+
+.media-liquid-card .v-img {
+  position: relative;
+}
+
+.media-liquid-card .v-img::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── 预览图 — CoverGeneratorView ── */
+.preview-img {
+  border-radius: var(--am-surface-radius, 16px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 16px rgba(78, 205, 196, 0.1);
+}
+
+/* ── 工作流任务参数区 — HomeView ── */
+.workflow-task-params {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--am-surface-radius, 16px);
+}
+
+html.glass-light .workflow-task-params {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ── AI 测试结果 / 当前会话高亮 — SettingsView ── */
+.bg-success-darken-4 {
+  background: rgba(78, 205, 196, 0.08) !important;
+  border: 1px solid rgba(78, 205, 196, 0.15) !important;
+  border-radius: var(--am-surface-radius, 16px) !important;
+}
+
+html.glass-light .bg-success-darken-4 {
+  background: rgba(168, 85, 247, 0.06) !important;
+  border-color: rgba(168, 85, 247, 0.12) !important;
+}
+
+/* ── 通用边框面板（日志面板、会话列表等）── */
+.border.rounded {
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: var(--am-surface-radius, 16px) !important;
+}
+
+html.glass-light .border.rounded {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ── 季/集卡片 — DetailsSeasons ── */
+.season-card {
+  transition: all 0.5s ease-out !important;
+}
+
+html.glass-light .season-card:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1), 0 0 20px rgba(168, 85, 247, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+html.glass-dark .season-card:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 24px rgba(168, 85, 247, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  transform: translateY(-2px);
+}
+
+.episode-card {
+  transition: all 0.5s ease-out !important;
+}
+
+html.glass-light .episode-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 0 16px rgba(168, 85, 247, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+html.glass-dark .episode-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 0 20px rgba(168, 85, 247, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  transform: translateY(-1px);
+}
+
+/* ── 剧集缩略图 / 季度海报容器 — 垂直居中 + cover 裁剪 ── */
+.episode-thumb-wrap {
+  overflow: hidden;
+  align-self: center;
+  border-radius: var(--am-surface-radius, 16px);
+}
+
+/* 集缩略图：跟随 wrap 圆角，图片四角同步裁切 */
+.episode-thumb-wrap .v-img {
+  border-radius: inherit;
+}
+
+.episode-thumb-wrap .v-img__img--cover {
+  object-position: center center;
+}
+
+.season-poster-wrap {
+  overflow: hidden;
+  align-self: center;
+  border-radius: var(--am-surface-radius, 16px);
+}
+
+/* 季海报：跟随 wrap 圆角，图片四角同步裁切 */
+.season-poster-wrap .v-img {
+  border-radius: inherit;
+}
+
+.season-poster-wrap .v-img__img--cover {
+  object-position: center center;
+}@media (min-width: 600px) {
+  .episode-thumb-wrap {
+    width: 200px;
+    min-width: 200px;
+    max-width: 240px;
+  }
+  .season-poster-wrap {
+    width: 160px;
+    min-width: 160px;
+    max-width: 180px;
+  }
+}
+
+/* ── 高级筛选按钮激活态 — FilterBar ── */
+.filter-btn-active {
+  border-color: rgba(168, 85, 247, 0.3) !important;
+}
+
+html.glass-dark .filter-btn-active {
+  background: rgba(168, 85, 247, 0.12) !important;
+  box-shadow: 0 0 8px rgba(78, 205, 196, 0.15) !important;
+}
+
+html.glass-light .filter-btn-active {
+  background: rgba(168, 85, 247, 0.08) !important;
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.12) !important;
+}
+
+/* ── 标签规则匹配说明文档 — TagsView ── */
+.tag-rules-explanation h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.tag-rules-explanation h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
+
+.tag-rules-explanation p {
+  margin-bottom: 6px;
+  line-height: 1.7;
+}
+
+.tag-rules-explanation ul {
+  margin-left: 20px;
+  margin-bottom: 10px;
+}
+
+.tag-rules-explanation li {
+  margin-bottom: 4px;
+  line-height: 1.6;
+}
+
+.tag-rules-explanation .explanation-keyword {
+  font-weight: bold;
+  color: rgb(var(--v-theme-primary));
+}
+
+.tag-rules-explanation .explanation-positive {
+  color: #1B8134;
+  font-weight: bold;
+}
+
+.tag-rules-explanation .explanation-negative {
+  color: #C62828;
+  font-weight: bold;
+}
+
+.tag-rules-explanation .explanation-note {
+  font-style: italic;
+  opacity: 0.75;
+  font-size: 0.9em;
+}
+
+html.glass-dark .tag-rules-explanation .explanation-positive {
+  color: #66bb6a;
+}
+
+html.glass-dark .tag-rules-explanation .explanation-negative {
+  color: #ef5350;
+}
+
+/* ── 可选缩略图选中态 — PreviewGeneratorView / CoverGeneratorView ── */
+.thumb-select-wrapper {
+  position: relative;
+  border-radius: var(--am-list-item-radius, 12px);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.25s ease-out;
+  overflow: hidden;
+}
+
+.thumb-select-wrapper:hover {
+  border-color: rgba(168, 85, 247, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.thumb-select--selected {
+  border-color: rgba(78, 205, 196, 0.8) !important;
+  box-shadow:
+    0 0 0 2px rgba(78, 205, 196, 0.3),
+    0 0 18px rgba(78, 205, 196, 0.25),
+    0 4px 16px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-2px) scale(1.02);
+}
+
+html.glass-light .thumb-select--selected {
+  border-color: rgba(124, 58, 237, 0.7) !important;
+  box-shadow:
+    0 0 0 2px rgba(124, 58, 237, 0.2),
+    0 0 18px rgba(124, 58, 237, 0.15),
+    0 4px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.thumb-select-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(78, 205, 196, 0.9);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(78, 205, 196, 0.4);
+}
+
+html.glass-light .thumb-select-check {
+  background: rgba(124, 58, 237, 0.9);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+}
+
+.thumb-select-check--sm {
+  width: 24px;
+  height: 24px;
+  top: 4px;
+  right: 4px;
+}
+
+/* ── 勾选角标动画 ── */
+.fade-check-enter-active {
+  transition: all 0.2s ease-out;
+}
+
+.fade-check-leave-active {
+  transition: all 0.15s ease-in;
+}
+
+.fade-check-enter-from {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.fade-check-leave-to {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+/* ── App Logo — SVG 图标主题自适应着色（<img> 无法继承 currentColor）── */
+html.glass-light .app-logo {
+  filter: brightness(0) saturate(100%) invert(47%) sepia(98%) saturate(1925%) hue-rotate(234deg) brightness(96%) contrast(96%);
+}
+
+html.glass-dark .app-logo {
+  filter: brightness(0) saturate(100%) invert(55%) sepia(85%) saturate(1200%) hue-rotate(135deg) brightness(86%) contrast(83%);
+}
+
+/* ── 透明 Logo 图片背景 — 棋盘格（TMDB/Fanart 白色透明底 logo）── */
+.logo-image-bg {
+  background-color: #e0e0e0;
+  background-image:
+    linear-gradient(45deg, #c8c8c8 25%, transparent 25%),
+    linear-gradient(-45deg, #c8c8c8 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #c8c8c8 75%),
+    linear-gradient(-45deg, transparent 75%, #c8c8c8 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+html.glass-dark .logo-image-bg {
+  background-color: #2a2a2a;
+  background-image:
+    linear-gradient(45deg, #3a3a3a 25%, transparent 25%),
+    linear-gradient(-45deg, #3a3a3a 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #3a3a3a 75%),
+    linear-gradient(-45deg, transparent 75%, #3a3a3a 75%);
+}
