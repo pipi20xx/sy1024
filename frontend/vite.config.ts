@@ -73,7 +73,7 @@ export default defineConfig(({ command, mode }) => {
       isAnalyze && visualizer({ open: true, gzipSize: true, filename: 'dist/stats.html' }),
     ],
     define: {
-      __APP_VERSION__: JSON.stringify('3.0.0'), // 改版本号只需改 package.json 的 version 字段
+      __APP_VERSION__: JSON.stringify('3.0.1'), // 改版本号只需改 package.json 的 version 字段
     },
     resolve: {
       alias: {
