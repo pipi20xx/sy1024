@@ -25,6 +25,33 @@ export const useDetailsStore = defineStore('details', () => {
   const webImages = ref<WebImage[]>([])
   const isImagesLoading = ref(false)
 
+  // 图片 cache-buster 版本号：仅在发生写操作（保存/删除/下载图片等）后递增，
+  // 同一会话内的普通加载/静默刷新复用同一 URL，让浏览器缓存生效。
+  // 之前每次 loadDetails 都用 Date.now()，详情页一刷新所有海报/剧照/集缩略图
+  // 全部重新下载（长剧一次就是几百个重复请求）。
+  // sessionBase 保证整页刷新后仍能拿到磁盘上更新过的图片。
+  const sessionBase = Date.now()
+  let imageVersion = 0
+
+  function applyImageCacheBuster(data: ItemDetails) {
+    const bust = `v=${sessionBase}-${imageVersion}`
+
+    if (data.images) {
+      data.images.forEach((img) => {
+        if (img.url?.startsWith('/media-content')) img.url = `${img.url}?${bust}`
+      })
+    }
+    if (data.poster_path?.startsWith('/media-content')) data.poster_path = `${data.poster_path}?${bust}`
+    if (data.seasons) {
+      data.seasons.forEach((season) => {
+        if (season.poster_path?.startsWith('/media-content')) season.poster_path = `${season.poster_path}?${bust}`
+        season.episodes?.forEach((ep) => {
+          if (ep.thumb_path?.startsWith('/media-content')) ep.thumb_path = `${ep.thumb_path}?${bust}`
+        })
+      })
+    }
+  }
+
   // 季/集网络图片状态
   const seasonWebImages = ref<WebImage[]>([])
   const episodeWebImages = ref<WebImage[]>([])
@@ -81,24 +108,7 @@ export const useDetailsStore = defineStore('details', () => {
     else isSilentRefreshing.value = true
     try {
       const data = await getItemDetails(currentItemType.value, currentItemId.value, currentViewMode.value)
-      const timestamp = Date.now()
-
-      if (data.images) {
-        data.images.forEach((img) => {
-          if (img.url?.startsWith('/media-content')) img.url = `${img.url}?t=${timestamp}`
-        })
-      }
-      if (data.poster_path?.startsWith('/media-content')) data.poster_path = `${data.poster_path}?t=${timestamp}`
-
-      if (data.seasons) {
-        data.seasons.forEach((season) => {
-          if (season.poster_path?.startsWith('/media-content')) season.poster_path = `${season.poster_path}?t=${timestamp}`
-          season.episodes?.forEach((ep) => {
-            if (ep.thumb_path?.startsWith('/media-content')) ep.thumb_path = `${ep.thumb_path}?t=${timestamp}`
-          })
-        })
-      }
-
+      applyImageCacheBuster(data)
       itemDetails.value = data
     } catch (err) {
       console.error('Failed to load details:', err)
@@ -106,6 +116,12 @@ export const useDetailsStore = defineStore('details', () => {
       isLoading.value = false
       isSilentRefreshing.value = false
     }
+  }
+
+  // 写操作后的刷新：先递增图片版本号，让本次加载拿到新的图片 URL
+  async function loadDetailsAfterChange(silent: boolean = false) {
+    imageVersion++
+    await loadDetails(silent)
   }
 
   async function toggleViewMode() {
@@ -117,7 +133,7 @@ export const useDetailsStore = defineStore('details', () => {
     isLoading.value = true
     try {
       await refreshItemCache(currentItemType.value, currentItemId.value)
-      await loadDetails()
+      await loadDetailsAfterChange()
     } catch (err) { console.error(err) } finally { isLoading.value = false }
   }
 
@@ -125,7 +141,7 @@ export const useDetailsStore = defineStore('details', () => {
     isLoading.value = true
     try {
       await updateItemMetadata(currentItemType.value, currentItemId.value, newData)
-      await loadDetails()
+      await loadDetailsAfterChange()
       return true
     } catch (err) { console.error(err); return false } finally { isLoading.value = false }
   }
@@ -134,7 +150,7 @@ export const useDetailsStore = defineStore('details', () => {
     isLoading.value = true
     try {
       await updateSeasonMetadata(currentItemId.value, seasonNumber, newData)
-      await loadDetails()
+      await loadDetailsAfterChange()
       return true
     } catch (err) { console.error(err); return false } finally { isLoading.value = false }
   }
@@ -143,7 +159,7 @@ export const useDetailsStore = defineStore('details', () => {
     isLoading.value = true
     try {
       await updateEpisodeMetadata(currentItemId.value, seasonNumber, episodeNumber, newData)
-      await loadDetails()
+      await loadDetailsAfterChange()
       return true
     } catch (err) { console.error(err); return false } finally { isLoading.value = false }
   }
@@ -160,7 +176,7 @@ export const useDetailsStore = defineStore('details', () => {
     isImagesLoading.value = true
     try {
       const result = await saveWebImages(currentItemType.value, currentItemId.value, imagesToSave, behavior)
-      if (result.success) { await loadDetails(true); return true }
+      if (result.success) { await loadDetailsAfterChange(true); return true }
       return false
     } catch (err) { console.error(err); return false } finally { isImagesLoading.value = false }
   }
@@ -177,7 +193,7 @@ export const useDetailsStore = defineStore('details', () => {
     isSeasonImagesLoading.value = true
     try {
       const result = await saveSeasonWebImages(currentItemId.value, seasonNumber, imagesToSave, behavior)
-      if (result.success) { await loadDetails(true); return true }
+      if (result.success) { await loadDetailsAfterChange(true); return true }
       return false
     } catch (err) { console.error(err); return false } finally { isSeasonImagesLoading.value = false }
   }
@@ -194,7 +210,7 @@ export const useDetailsStore = defineStore('details', () => {
     isEpisodeImagesLoading.value = true
     try {
       const result = await saveEpisodeWebImages(currentItemId.value, seasonNumber, episodeNumber, imagesToSave, behavior)
-      if (result.success) { await loadDetails(true); return true }
+      if (result.success) { await loadDetailsAfterChange(true); return true }
       return false
     } catch (err) { console.error(err); return false } finally { isEpisodeImagesLoading.value = false }
   }
@@ -203,7 +219,7 @@ export const useDetailsStore = defineStore('details', () => {
     isImagesLoading.value = true
     try {
       const result = await downloadImagesFromEmby(currentItemType.value, currentItemId.value)
-      if (result.success) { await loadDetails(); return true }
+      if (result.success) { await loadDetailsAfterChange(); return true }
       return false
     } catch (err) { console.error(err); return false } finally { isImagesLoading.value = false }
   }
@@ -232,7 +248,7 @@ export const useDetailsStore = defineStore('details', () => {
     isImagesLoading.value = true
     try {
       const result = await savePreviewToOverride(currentItemType.value, currentItemId.value, imageUrl, imageType, seasonNumber, episodeNumber)
-      if (result.success) { await loadDetails(true); return true }
+      if (result.success) { await loadDetailsAfterChange(true); return true }
       return false
     } catch (err) { console.error(err); return false } finally { isImagesLoading.value = false }
   }
@@ -243,49 +259,49 @@ export const useDetailsStore = defineStore('details', () => {
 
   async function copyItemToOverride() {
     isLoading.value = true
-    try { await copyToOverride(currentItemType.value, currentItemId.value); await loadDetails(); return true }
+    try { await copyToOverride(currentItemType.value, currentItemId.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function deleteImages() {
     isLoading.value = true
-    try { await deleteItemImages(currentItemType.value, currentItemId.value); await loadDetails(); return true }
+    try { await deleteItemImages(currentItemType.value, currentItemId.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function deletePatches() {
     isLoading.value = true
-    try { await deletePatchesFolder(currentItemType.value, currentItemId.value); await loadDetails(); return true }
+    try { await deletePatchesFolder(currentItemType.value, currentItemId.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function deleteMetadata(mode: 'all' | 'main_only') {
     isLoading.value = true
-    try { await deleteItemMetadata(currentItemType.value, currentItemId.value, mode); await loadDetails(); return true }
+    try { await deleteItemMetadata(currentItemType.value, currentItemId.value, mode); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function deleteTags() {
     isLoading.value = true
-    try { await deleteItemTags(currentItemType.value, currentItemId.value); await loadDetails(); return true }
+    try { await deleteItemTags(currentItemType.value, currentItemId.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function deleteEpisodeOrder() {
     isLoading.value = true
-    try { await deleteEpisodeOrderFile(currentItemId.value); await loadDetails(); return true }
+    try { await deleteEpisodeOrderFile(currentItemId.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function deleteEpisodeGroup() {
     isLoading.value = true
-    try { await deleteEpisodeGroupFile(currentItemId.value); await loadDetails(); return true }
+    try { await deleteEpisodeGroupFile(currentItemId.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function deleteExternalIds() {
     isLoading.value = true
-    try { await deleteExternalIdsFile(currentItemType.value, currentItemId.value); await loadDetails(); return true }
+    try { await deleteExternalIdsFile(currentItemType.value, currentItemId.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
@@ -299,7 +315,7 @@ export const useDetailsStore = defineStore('details', () => {
         else if (target === 'episode_order') await deleteEpisodeOrderFile(currentItemId.value)
         else if (target === 'episode_group') await deleteEpisodeGroupFile(currentItemId.value)
       }
-      await loadDetails()
+      await loadDetailsAfterChange()
       return true
     }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
@@ -307,25 +323,25 @@ export const useDetailsStore = defineStore('details', () => {
 
   async function deleteOverrideFolder() {
     isLoading.value = true
-    try { await deleteOverride(currentItemType.value, currentItemId.value); await loadDetails(); return true }
+    try { await deleteOverride(currentItemType.value, currentItemId.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function deleteCacheFolder() {
     isLoading.value = true
-    try { await deleteCache(currentItemType.value, currentItemId.value); await loadDetails(); return true }
+    try { await deleteCache(currentItemType.value, currentItemId.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function deleteSeason(seasonNumber: number, includeEpisodes: boolean) {
     isLoading.value = true
-    try { await deleteSeasonMetadata(currentItemId.value, seasonNumber, includeEpisodes); await loadDetails(); return true }
+    try { await deleteSeasonMetadata(currentItemId.value, seasonNumber, includeEpisodes); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function deleteEpisode(seasonNumber: number, episodeNumber: number) {
     isLoading.value = true
-    try { await deleteEpisodeMetadata(currentItemId.value, seasonNumber, episodeNumber); await loadDetails(); return true }
+    try { await deleteEpisodeMetadata(currentItemId.value, seasonNumber, episodeNumber); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
@@ -342,25 +358,25 @@ export const useDetailsStore = defineStore('details', () => {
 
   async function triggerEmbyMetadataUpdate(fields: string[] = [], updateChildren = false) {
     isLoading.value = true
-    try { await updateMetadataFromEmby(currentItemType.value, currentItemId.value, fields, updateChildren); await loadDetails(); return true }
+    try { await updateMetadataFromEmby(currentItemType.value, currentItemId.value, fields, updateChildren); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function lockName() {
     isLoading.value = true
-    try { await lockItemName(currentItemType.value, currentItemId.value); await loadDetails(); return true }
+    try { await lockItemName(currentItemType.value, currentItemId.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function updatePatchNameField(name: string) {
     isLoading.value = true
-    try { await updatePatchName(currentItemType.value, currentItemId.value, name); await loadDetails(); return true }
+    try { await updatePatchName(currentItemType.value, currentItemId.value, name); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
   async function generateTags(mode: 'merge' | 'overwrite') {
     isLoading.value = true
-    try { await generateItemTags(currentItemType.value, currentItemId.value, mode); await loadDetails(); return true }
+    try { await generateItemTags(currentItemType.value, currentItemId.value, mode); await loadDetailsAfterChange(); return true }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
 
@@ -368,7 +384,7 @@ export const useDetailsStore = defineStore('details', () => {
     isLoading.value = true
     try {
       await updateMetadataFromBangumi(currentItemType.value, currentItemId.value, undefined, ['tags'], false, useWhitelist, mode)
-      await loadDetails(); return true
+      await loadDetailsAfterChange(); return true
     }
     catch (e) { console.error(e); return false } finally { isLoading.value = false }
   }
@@ -376,7 +392,7 @@ export const useDetailsStore = defineStore('details', () => {
   async function saveAllChanges() {
     if (!itemDetails.value) return false
     isLoading.value = true
-    try { await saveFullDetails(currentItemType.value, currentItemId.value, itemDetails.value); await loadDetails(); return true }
+    try { await saveFullDetails(currentItemType.value, currentItemId.value, itemDetails.value); await loadDetailsAfterChange(); return true }
     catch (e) { console.error('Full save failed:', e); return false } finally { isLoading.value = false }
   }
 

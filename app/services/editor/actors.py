@@ -246,17 +246,21 @@ class ActorsMixin:
                     actor_map[int(d_id)] = standard_info
 
         log_audit("编辑", "完成", f"📚 字典构建完成，共包含 {len(actor_map)} 条 ID 映射规则。")
-        # 2. 收集所有 JSON 文件
-        json_files = []
-        for item_type in ['tmdb-movies2', 'tmdb-tv']:
-            type_dir = os.path.join(override_path, item_type)
-            if not os.path.isdir(type_dir): continue
-            for tmdb_id in os.listdir(type_dir):
-                item_dir = os.path.join(type_dir, tmdb_id)
-                if not os.path.isdir(item_dir): continue
-                for fname in os.listdir(item_dir):
-                    if fname.endswith('.json'):
-                        json_files.append(os.path.join(item_dir, fname))
+        # 2. 收集所有 JSON 文件（目录遍历放线程池，避免阻塞事件循环）
+        def _collect_json_files():
+            files = []
+            for item_type in ['tmdb-movies2', 'tmdb-tv']:
+                type_dir = os.path.join(override_path, item_type)
+                if not os.path.isdir(type_dir): continue
+                for tmdb_id in os.listdir(type_dir):
+                    item_dir = os.path.join(type_dir, tmdb_id)
+                    if not os.path.isdir(item_dir): continue
+                    for fname in os.listdir(item_dir):
+                        if fname.endswith('.json'):
+                            files.append(os.path.join(item_dir, fname))
+            return files
+
+        json_files = await asyncio.to_thread(_collect_json_files)
 
         total_files = len(json_files)
         log_audit("编辑", "完成", f"🔍 检索完成，共需检查 {total_files} 个 JSON 文件。")
@@ -303,11 +307,12 @@ class ActorsMixin:
                 pass
             return False
 
-        # 4. 多线程执行更新
-        updated_count = 0
-        with ThreadPoolExecutor(max_workers=16) as executor:
-            results = list(executor.map(_process_file, json_files))
-            updated_count = sum(1 for r in results if r)
+        # 4. 多线程执行更新（executor.map 的同步等待同样放线程池，事件循环只等结果）
+        def _run_batch():
+            with ThreadPoolExecutor(max_workers=16) as executor:
+                return sum(1 for r in executor.map(_process_file, json_files) if r)
+
+        updated_count = await asyncio.to_thread(_run_batch)
 
         log_audit("编辑", "完成", f"✅ 任务完成！共检查 {total_files} 个文件，更新了其中 {updated_count} 个包含演员信息的文件。")
         await manager.broadcast_progress("update_actors_override", "completed", total_files, total_files, f"更新完成！已修正 {updated_count} 个文件。")

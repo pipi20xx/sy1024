@@ -88,8 +88,10 @@ async def run_workflow_in_background(item_type: str, tasks: List[Dict], interval
                         lang_priority = params.get("lang_priority", "zh")
                         source_priority = params.get("source_priority", "")
                         
-                        # 1. Fetch images
-                        fetch_success, result = service.image_service.get_web_images(item_type, item_id, image_types, sources)
+                        # 1. Fetch images（同步 requests，放线程池避免阻塞事件循环）
+                        fetch_success, result = await asyncio.to_thread(
+                            service.image_service.get_web_images, item_type, item_id, image_types, sources
+                        )
                         
                         if not fetch_success:
                             if "均未找到" in str(result):

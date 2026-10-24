@@ -54,6 +54,45 @@ class AiTranslateMixin:
                     log_audit("编辑", "失败", f"AI 翻译简介失败: {e}", level="ERROR")
         # 3.5 翻译季/集 (仅剧集)
         if item_type == "tmdb-tv" and details.get("seasons"):
+            # 集级翻译并发执行（信号量限流，避免瞬间打爆 LLM 接口）。
+            # 原实现是三层嵌套串行 await：一部 24 集×2 字段的剧 = 50+ 次串行 LLM 往返，
+            # 总耗时被 LLM 延迟 × 请求数主导；集与集之间互不依赖，可安全并发。
+            translate_semaphore = asyncio.Semaphore(4)
+
+            async def _translate_text(text: str, context: str) -> Optional[str]:
+                async with translate_semaphore:
+                    try:
+                        return await llm.translate(text, context=context)
+                    except Exception as e:
+                        log_audit("编辑", "失败", f"AI 翻译失败 ({context}): {e}", level="ERROR")
+                        return None
+
+            async def _translate_episode(s_num: int, episode: Dict[str, Any]) -> bool:
+                e_num = episode.get("episode_number")
+                if not episode.get("metadata"):
+                    return False
+                e_changed = False
+
+                if config.get("episode_title"):
+                    orig_e_title = episode["metadata"].get("name")
+                    if orig_e_title:
+                        translated = await _translate_text(orig_e_title, "episode_title")
+                        if translated:
+                            episode["metadata"]["name"] = translated
+                            e_changed = True
+
+                if config.get("episode_overview"):
+                    orig_e_ov = episode["metadata"].get("overview")
+                    if orig_e_ov:
+                        translated = await _translate_text(orig_e_ov, "episode_overview")
+                        if translated:
+                            episode["metadata"]["overview"] = translated
+                            e_changed = True
+
+                if e_changed:
+                    await self.update_episode_metadata(item_id, s_num, e_num, episode["metadata"])
+                return e_changed
+
             for season in details["seasons"]:
                 s_num = season.get("season_number")
                 s_changed = False
@@ -62,47 +101,30 @@ class AiTranslateMixin:
                 if config.get("season_title") and season.get("metadata"):
                     orig_s_name = season["metadata"].get("name")
                     if orig_s_name:
-                        try:
-                            season["metadata"]["name"] = await llm.translate(orig_s_name, context="season_title")
+                        translated = await _translate_text(orig_s_name, "season_title")
+                        if translated:
+                            season["metadata"]["name"] = translated
                             s_changed = True
-                        except: pass
 
                 # 翻译季简介
                 if config.get("season_overview") and season.get("metadata"):
                     orig_s_ov = season["metadata"].get("overview")
                     if orig_s_ov:
-                        try:
-                            season["metadata"]["overview"] = await llm.translate(orig_s_ov, context="season_overview")
+                        translated = await _translate_text(orig_s_ov, "season_overview")
+                        if translated:
+                            season["metadata"]["overview"] = translated
                             s_changed = True
-                        except: pass
 
-                # 翻译集标题和简介
+                # 翻译集标题和简介（同季各集并发）
                 if season.get("episodes"):
-                    for episode in season["episodes"]:
-                        e_num = episode.get("episode_number")
-                        e_changed = False
-                        if not episode.get("metadata"): continue
-
-                        # 集标题
-                        if config.get("episode_title"):
-                            orig_e_title = episode["metadata"].get("name")
-                            if orig_e_title:
-                                try:
-                                    episode["metadata"]["name"] = await llm.translate(orig_e_title, context="episode_title")
-                                    e_changed = True
-                                except: pass
-
-                        # 集简介
-                        if config.get("episode_overview"):
-                            orig_e_ov = episode["metadata"].get("overview")
-                            if orig_e_ov:
-                                try:
-                                    episode["metadata"]["overview"] = await llm.translate(orig_e_ov, context="episode_overview")
-                                    e_changed = True
-                                except: pass
-
-                        if e_changed:
-                            await self.update_episode_metadata(item_id, s_num, e_num, episode["metadata"])
+                    episode_results = await asyncio.gather(
+                        *(_translate_episode(s_num, ep) for ep in season["episodes"]),
+                        return_exceptions=True,
+                    )
+                    for r in episode_results:
+                        if isinstance(r, BaseException):
+                            log_audit("编辑", "失败", f"AI 翻译集元数据时出错: {r}", level="ERROR")
+                        elif r:
                             s_changed = True  # 集变了，季也算变了（虽然季文件不一定变，但为了逻辑统一）
 
                 if s_changed:

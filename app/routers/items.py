@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query, Request, UploadFile, File
 from fastapi.responses import JSONResponse, FileResponse, Response
 from typing import Optional, List
+import asyncio
 import os
 import json
 from .. import globals
@@ -176,7 +177,10 @@ async def get_web_images_for_item(item_type: str, item_id: str, request: Request
     if sources_param:
         final_sources.extend([s.strip().lower() for s in sources_param.split(',') if s.strip()])
             
-    success, data_or_msg = globals.service.image_service.get_web_images(item_type, item_id, final_image_types, final_sources)
+    # get_web_images 内部是同步 requests + 文件读取，必须放线程池避免阻塞事件循环
+    success, data_or_msg = await asyncio.to_thread(
+        globals.service.image_service.get_web_images, item_type, item_id, final_image_types, final_sources
+    )
     if not success:
         raise HTTPException(status_code=404, detail=data_or_msg)
     return data_or_msg
@@ -195,7 +199,9 @@ async def get_season_web_images(series_id: str, season_number: int, request: Req
     if sources_param:
         final_sources.extend([s.strip().lower() for s in sources_param.split(',') if s.strip()])
 
-    success, data_or_msg = globals.service.image_service.get_season_web_images(series_id, season_number, final_image_types, final_sources)
+    success, data_or_msg = await asyncio.to_thread(
+        globals.service.image_service.get_season_web_images, series_id, season_number, final_image_types, final_sources
+    )
     if not success:
         raise HTTPException(status_code=404, detail=data_or_msg)
     return data_or_msg
@@ -235,7 +241,9 @@ async def get_episode_web_images(series_id: str, season_number: int, episode_num
     if sources_param:
         final_sources.extend([s.strip().lower() for s in sources_param.split(',') if s.strip()])
 
-    success, data_or_msg = globals.service.image_service.get_episode_web_images(series_id, season_number, episode_number, final_image_types, final_sources)
+    success, data_or_msg = await asyncio.to_thread(
+        globals.service.image_service.get_episode_web_images, series_id, season_number, episode_number, final_image_types, final_sources
+    )
     if not success:
         raise HTTPException(status_code=404, detail=data_or_msg)
     return data_or_msg

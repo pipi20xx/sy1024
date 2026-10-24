@@ -7,7 +7,8 @@
  * - 主色调可通过主题定制器（PrimaryColorDialog）动态切换，不分白天/夜晚
  * - ACG / 液态玻璃主题通过 CSS 覆盖实现
  * - 圆角统一由 visual.css 的 --am-*-radius 令牌控制，不用 Vuetify rounded 默认值
- * - 图标：全部使用 MDI (@mdi/js)
+ * - 图标：webfont 版 MDI 图标集（vuetify/iconsets/mdi，依赖 @mdi/font 的
+ *   webfont，在 main.ts 引入；不是 @mdi/js 的 SVG 版 mdi-svg）
  */
 import { createVuetify } from 'vuetify'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'

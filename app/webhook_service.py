@@ -98,7 +98,8 @@ class WebhookService:
                         log_audit("Webhook", "失败", f"{log_prefix} 成员同步失败: {message}", level="ERROR")
             elif event_type == "image.update":
                 # 当图片变动时，仅下载并覆盖对应的图片文件
-                self._handle_collection_image_update(item_data, description)
+                # （此前漏了 await，协程从未真正执行，合集图片同步一直失效）
+                await self._handle_collection_image_update(item_data, description)
         
         # 4. [核心新增] 处理 Emby 原生元数据更新事件
         elif event_type == "metadata.update":

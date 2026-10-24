@@ -67,7 +67,7 @@ services:
       # 挂载前端源码（修改后 HMR 即时生效）
       - ./frontend:/frontend
       # 持久化 node_modules（避免每次重新 install）
-      - frontend_node_modules:/frontend/node_modules
+      #- frontend_node_modules:/frontend/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true    # Docker 内文件监听需要
       - VITE_PROXY_TARGET=http://backend:8000    # API 代理到后端容器

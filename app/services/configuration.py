@@ -33,6 +33,7 @@ class ConfigurationService:
             "tmdb_api_key": "",
             "tmdb_proxy_fallback": True,  # 是否开启远程回退代理
             "tmdb_episode_group_mode": False,  # 是否开启剧集组模式
+            "tmdb_fetch_cache_ttl": 900,  # TMDB 远程请求内存缓存有效期（秒），0 = 不缓存
             "tmdb_preferred_language": "zh-CN",  # 元数据首选语言
             "tmdb_image_languages": "zh-CN,en,ja,ko,null",  # 图片回退语言列表
             "data_path": data_dir,

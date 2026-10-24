@@ -233,10 +233,16 @@ class SystemService:
         from ..models.user import User
         
         log_audit("数据库", "初始化", "正在初始化数据库表 (SQLAlchemy)", level="START")
-        
+
+        from sqlalchemy import text as sa_text
+
         # Initialize Items DB (Only Item table)
         async with items_engine.begin() as conn:
              await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn, tables=[Item.__table__]))
+             # create_all 不会给已存在的表补建新索引，手动幂等创建
+             await conn.execute(sa_text(
+                 "CREATE INDEX IF NOT EXISTS ix_items_item_type_full_date ON items (item_type, full_date)"
+             ))
         
         # Initialize Actors DB (Only Actor table)
         async with actors_engine.begin() as conn:
@@ -275,6 +281,9 @@ class SystemService:
         # Initialize Media Relations DB (Only TmdbBangumiMap table)
         async with media_relations_engine.begin() as conn:
             await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn, tables=[TmdbBangumiMap.__table__]))
+            await conn.execute(sa_text(
+                "CREATE INDEX IF NOT EXISTS ix_tmdb_bangumi_map_bangumi_id ON tmdb_bangumi_map (bangumi_id)"
+            ))
             
         # Initialize TmdbBgmMapping DB (Only TmdbBgmMapping table)
         async with tmdb_bgm_mapping_engine.begin() as conn:

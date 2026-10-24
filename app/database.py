@@ -1,7 +1,6 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy import event
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool
 import os
 
 from .common import get_config_path, APP_DB_FILENAME
@@ -55,12 +54,21 @@ def create_engine_config(db_url: str):
         return {
             'echo': False,
             'pool_size': 10,
-            'max_overflow': 20
+            'max_overflow': 20,
+            # pre_ping + recycle：避免长连接被服务端/防火墙断开后出现僵死连接
+            'pool_pre_ping': True,
+            'pool_recycle': 1800,
         }
     else:
+        # SQLite：使用默认的 AsyncAdaptedQueuePool 小连接池复用连接。
+        # 之前用的 NullPool 每次开 session 都要重新打开数据库文件并执行 PRAGMA，
+        # 而本项目大量采用"每个方法开自己的 session"的模式，连接重建开销被成倍放大。
+        # SQLite 同一时刻只有一个写者，配合 busy_timeout 让写冲突等待而不是立即报
+        # "database is locked"，池子保持很小以控制并发写压力。
         return {
             'echo': False,
-            'poolclass': NullPool,
+            'pool_size': 5,
+            'max_overflow': 3,
             'connect_args': {"check_same_thread": False}
         }
 
@@ -86,6 +94,8 @@ if DB_TYPE == 'sqlite':
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA journal_mode=WAL")
         cursor.execute("PRAGMA synchronous=NORMAL")
+        # 写锁冲突时等待 5 秒重试，而不是立即抛 "database is locked"
+        cursor.execute("PRAGMA busy_timeout=5000")
         cursor.close()
 
     event.listen(items_engine.sync_engine, "connect", _set_sqlite_pragma)

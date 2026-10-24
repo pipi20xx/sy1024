@@ -187,7 +187,8 @@ class PreviewGeneratorService:
             # This ensures the file is actually accessible and metadata is correct for the new path
             if is_url or original_path != media_path or duration == 0:
                 log_audit("预览", "开始", f"路径是URL或已映射，正在使用 ffprobe 验证时长: {media_path}")
-                probed_duration = self.get_video_duration(media_path)
+                # ffprobe 是同步 subprocess（最长 60s），放线程池避免阻塞事件循环
+                probed_duration = await asyncio.to_thread(self.get_video_duration, media_path)
                 if probed_duration > 0:
                     duration = probed_duration
                 else:

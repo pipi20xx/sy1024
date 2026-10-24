@@ -8,6 +8,7 @@ import re
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import httpx
+import aiofiles
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse, StreamingResponse
 
@@ -644,6 +645,12 @@ def get_cached_tmdb_image_path(size: str, tmdb_path: str) -> Optional[str]:
     return os.path.join(cache_base, size, safe_name)
 
 
+# TMDB 图片下载 in-flight 去重：Emby 刮削时同一图片常被并发请求多次，
+# 不加锁会重复下载并交叉写坏同一个缓存文件
+_image_download_locks: Dict[str, asyncio.Lock] = {}
+_image_download_locks_guard = asyncio.Lock()
+
+
 @router.get("/tmdb-mock/t/p/{size}/{file_path:path}")
 async def get_image(size: str, file_path: str, request: Request):
     file_path = file_path.lstrip('/')
@@ -676,22 +683,44 @@ async def get_image(size: str, file_path: str, request: Request):
 
     try:
         client = await get_image_client()
+
+        dl_lock: Optional[asyncio.Lock] = None
         if cached_path:
-            os.makedirs(os.path.dirname(cached_path), exist_ok=True)
+            async with _image_download_locks_guard:
+                dl_lock = _image_download_locks.setdefault(cached_path, asyncio.Lock())
 
         async def image_stream():
+            if dl_lock is not None:
+                async with dl_lock:
+                    # 排队期间前一个并发请求可能已完成下载并写好缓存
+                    if cached_path and os.path.exists(cached_path):
+                        async with aiofiles.open(cached_path, 'rb') as f:
+                            while True:
+                                chunk = await f.read(256 * 1024)
+                                if not chunk:
+                                    break
+                                yield chunk
+                        return
+                    async for chunk in _download_and_cache():
+                        yield chunk
+            else:
+                async for chunk in _download_and_cache():
+                    yield chunk
+
+        async def _download_and_cache():
             cache_file = None
             try:
                 if cached_path:
-                    cache_file = open(cached_path, 'wb')
+                    os.makedirs(os.path.dirname(cached_path), exist_ok=True)
+                    cache_file = await aiofiles.open(cached_path, 'wb')
                 async with client.stream('GET', tmdb_image_url) as response:
                     if response.status_code == 200:
                         async for chunk in response.aiter_bytes():
                             if cache_file:
-                                cache_file.write(chunk)
+                                await cache_file.write(chunk)
                             yield chunk
                     elif cache_file:
-                        cache_file.close()
+                        await cache_file.close()
                         cache_file = None
                         # 远程返回非 200，删除空缓存文件
                         try:
@@ -701,14 +730,18 @@ async def get_image(size: str, file_path: str, request: Request):
             except Exception:
                 # 下载失败时关闭并删除不完整的缓存文件
                 if cache_file:
-                    cache_file.close()
+                    await cache_file.close()
                     try:
                         os.remove(cached_path)
                     except OSError:
                         pass
             finally:
                 if cache_file:
-                    cache_file.close()
+                    await cache_file.close()
+                if dl_lock is not None:
+                    async with _image_download_locks_guard:
+                        if _image_download_locks.get(cached_path) is dl_lock and not dl_lock.locked():
+                            _image_download_locks.pop(cached_path, None)
 
         return StreamingResponse(
             image_stream(),

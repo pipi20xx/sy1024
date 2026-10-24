@@ -2,6 +2,9 @@ import httpx
 import json
 import os
 import asyncio
+import copy
+import time
+from collections import OrderedDict
 from typing import Dict, Any, Optional, List, Tuple
 from .configuration import ConfigurationService
 from .editor import EditorService
@@ -15,6 +18,22 @@ from ..logger import log_audit
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
 
 class TmdbMetadataService:
+    # 远程响应的进程内 TTL 缓存：Emby 刮削 /tmdb-mock 时同一资源会被反复请求，
+    # TMDB 源数据变化极少，缓存可大幅减少对 TMDB API 的重复回源。
+    # 实际生效时长读取系统设置 tmdb_fetch_cache_ttl（秒，0 = 关闭），此值仅为默认。
+    _RESPONSE_CACHE_TTL = 900.0
+    _RESPONSE_CACHE_MAX = 512     # 最大条目数（近似 LRU）
+
+    # 共享 AsyncClient（按代理配置复用；代理变更时重建）
+    _shared_client: Optional[httpx.AsyncClient] = None
+    _shared_client_proxy: Optional[str] = None
+    _shared_client_guard: Optional[asyncio.Lock] = None
+
+    # TTL 缓存与 in-flight 去重注册表（均为类级，进程内共享）
+    _response_cache: "OrderedDict[Tuple, Tuple[float, Dict[str, Any]]]" = OrderedDict()
+    _inflight_guard: Optional[asyncio.Lock] = None
+    _inflight: Dict[Tuple, asyncio.Lock] = {}
+
     # ID to Chinese Name Map
     GENRE_ID_NAME_MAP = {
         28: "动作", 12: "冒险", 16: "动画", 35: "喜剧", 80: "犯罪",
@@ -65,8 +84,87 @@ class TmdbMetadataService:
         log_audit("元数据", "处理", "在任何预期位置都找不到 tmdb_mapping.json。", level="CRITICAL")
         return {}
 
+    @classmethod
+    async def _get_shared_client(cls, proxy_url: Optional[str]) -> httpx.AsyncClient:
+        """按当前代理配置复用共享 AsyncClient，避免每次请求重建连接池/TLS 握手。"""
+        if cls._shared_client_guard is None:
+            cls._shared_client_guard = asyncio.Lock()
+        client = cls._shared_client
+        if client is None or client.is_closed or cls._shared_client_proxy != proxy_url:
+            async with cls._shared_client_guard:
+                client = cls._shared_client
+                if client is None or client.is_closed or cls._shared_client_proxy != proxy_url:
+                    old = client
+                    client = httpx.AsyncClient(
+                        proxy=proxy_url,
+                        timeout=httpx.Timeout(10.0, connect=10.0),
+                        limits=httpx.Limits(max_keepalive_connections=20, max_connections=50),
+                    )
+                    cls._shared_client = client
+                    cls._shared_client_proxy = proxy_url
+                    if old is not None and not old.is_closed:
+                        await old.aclose()
+        return client
+
+    def _cache_ttl(self) -> float:
+        """缓存有效期（秒），读系统设置 tmdb_fetch_cache_ttl，0 = 关闭缓存。"""
+        try:
+            return float(self.config_service.get('tmdb_fetch_cache_ttl', self._RESPONSE_CACHE_TTL))
+        except (TypeError, ValueError):
+            return self._RESPONSE_CACHE_TTL
+
+    def _cache_get(self, key: Tuple) -> Optional[Dict[str, Any]]:
+        ttl = self._cache_ttl()
+        if ttl <= 0:
+            return None
+        entry = self._response_cache.get(key)
+        if entry is None:
+            return None
+        stored_at, data = entry
+        if time.monotonic() - stored_at > ttl:
+            self._response_cache.pop(key, None)
+            return None
+        self._response_cache.move_to_end(key)
+        # 调用方会就地修改返回的数据，必须返回深拷贝防止污染缓存
+        return copy.deepcopy(data)
+
+    def _cache_set(self, key: Tuple, data: Dict[str, Any]) -> None:
+        if self._cache_ttl() <= 0:
+            return
+        self._response_cache[key] = (time.monotonic(), data)
+        self._response_cache.move_to_end(key)
+        while len(self._response_cache) > self._RESPONSE_CACHE_MAX:
+            self._response_cache.popitem(last=False)
+
     async def fetch_tmdb_data(self, item_type: str, tmdb_id: str, lang: str, season_number: Optional[int] = None, episode_number: Optional[int] = None) -> Dict[str, Any]:
-        """Fetches raw data from TMDB API."""
+        """Fetches raw data from TMDB API（带进程内 TTL 缓存与并发请求去重）。"""
+        proxy_url = self.config_service.get_proxy_url('tmdb')
+        key = (item_type, str(tmdb_id), lang, season_number, episode_number, proxy_url)
+
+        cached = self._cache_get(key)
+        if cached is not None:
+            return cached
+
+        # in-flight 去重：同一资源的并发请求只打一次 TMDB
+        if self._inflight_guard is None:
+            TmdbMetadataService._inflight_guard = asyncio.Lock()
+        async with self._inflight_guard:
+            key_lock = self._inflight.setdefault(key, asyncio.Lock())
+        try:
+            async with key_lock:
+                cached = self._cache_get(key)  # 双重检查：排队期间可能已被其他请求填充
+                if cached is not None:
+                    return cached
+                data = await self._fetch_tmdb_data_remote(item_type, tmdb_id, lang, season_number, episode_number, proxy_url)
+                self._cache_set(key, data)
+                return copy.deepcopy(data)
+        finally:
+            async with self._inflight_guard:
+                if self._inflight.get(key) is key_lock:
+                    self._inflight.pop(key, None)
+
+    async def _fetch_tmdb_data_remote(self, item_type: str, tmdb_id: str, lang: str, season_number: Optional[int] = None, episode_number: Optional[int] = None, proxy_url: Optional[str] = None) -> Dict[str, Any]:
+        """实际请求 TMDB API（无缓存）。"""
         api_key = self.config_service.get('tmdb_api_key')
         
         if not api_key:
@@ -115,43 +213,43 @@ class TmdbMetadataService:
         log_audit("元数据", "开始", f"DEBUG: 准备请求 TMDB API")
         log_audit("元数据", "处理", f"DEBUG: URL: {url}")
         log_audit("元数据", "处理", f"DEBUG: Params: {params}")
-        proxy_url = self.config_service.get_proxy_url('tmdb')
-        proxies = {"http://": proxy_url, "https://": proxy_url} if proxy_url else None
+        if proxy_url is None:
+            proxy_url = self.config_service.get_proxy_url('tmdb')
         if proxy_url:
             log_audit("元数据", "处理", f"[Proxy] TMDB 元数据请求 (httpx) 将通过代理: {proxy_url}")
-        async with httpx.AsyncClient(proxy=proxy_url) as client:
-            try:
-                response = await client.get(url, params=params, timeout=10.0)
-                response.raise_for_status()
-                data = response.json()
-                
-                # 增加对返回内容的检查日志
-                log_audit("元数据", "完成", f"DEBUG: TMDB 响应成功，Keys: {list(data.keys())}")
-                if item_type == "person":
-                    # person 类型使用 combined_credits 而非 credits
-                    if "combined_credits" in data:
-                        c = data["combined_credits"]
-                        cast_len = len(c.get("cast", []))
-                        crew_len = len(c.get("crew", []))
-                        log_audit("元数据", "处理", f"DEBUG: 发现 combined_credits 数据 - Cast: {cast_len}, Crew: {crew_len}")
-                    else:
-                        log_audit("元数据", "处理", "DEBUG: TMDB 响应中缺失 'combined_credits' 字段！", level="WARN")
+        client = await self._get_shared_client(proxy_url)
+        try:
+            response = await client.get(url, params=params, timeout=10.0)
+            response.raise_for_status()
+            data = response.json()
+            
+            # 增加对返回内容的检查日志
+            log_audit("元数据", "完成", f"DEBUG: TMDB 响应成功，Keys: {list(data.keys())}")
+            if item_type == "person":
+                # person 类型使用 combined_credits 而非 credits
+                if "combined_credits" in data:
+                    c = data["combined_credits"]
+                    cast_len = len(c.get("cast", []))
+                    crew_len = len(c.get("crew", []))
+                    log_audit("元数据", "处理", f"DEBUG: 发现 combined_credits 数据 - Cast: {cast_len}, Crew: {crew_len}")
                 else:
-                    if "credits" in data:
-                        c = data["credits"]
-                        cast_len = len(c.get("cast", []))
-                        crew_len = len(c.get("crew", []))
-                        guest_len = len(c.get("guest_stars", []))
-                        log_audit("元数据", "处理", f"DEBUG: 发现 credits 数据 - Cast: {cast_len}, Crew: {crew_len}, GuestStars: {guest_len}")
-                    else:
-                        log_audit("元数据", "处理", "DEBUG: TMDB 响应中缺失 'credits' 字段！", level="WARN")
-                return data
-            except httpx.HTTPStatusError as e:
-                log_audit("元数据", "处理", f"TMDB API Error: {e.response.status_code} - {e.response.text}", level="ERROR")
-                raise Exception(f"TMDB API Error: {e.response.status_code}")
-            except Exception as e:
-                log_audit("元数据", "失败", f"获取 TMDB 数据时发生 network 错误: {e}", level="ERROR")
-                raise
+                    log_audit("元数据", "处理", "DEBUG: TMDB 响应中缺失 'combined_credits' 字段！", level="WARN")
+            else:
+                if "credits" in data:
+                    c = data["credits"]
+                    cast_len = len(c.get("cast", []))
+                    crew_len = len(c.get("crew", []))
+                    guest_len = len(c.get("guest_stars", []))
+                    log_audit("元数据", "处理", f"DEBUG: 发现 credits 数据 - Cast: {cast_len}, Crew: {crew_len}, GuestStars: {guest_len}")
+                else:
+                    log_audit("元数据", "处理", "DEBUG: TMDB 响应中缺失 'credits' 字段！", level="WARN")
+            return data
+        except httpx.HTTPStatusError as e:
+            log_audit("元数据", "处理", f"TMDB API Error: {e.response.status_code} - {e.response.text}", level="ERROR")
+            raise Exception(f"TMDB API Error: {e.response.status_code}")
+        except Exception as e:
+            log_audit("元数据", "失败", f"获取 TMDB 数据时发生 network 错误: {e}", level="ERROR")
+            raise
 
     async def search_tmdb(self, item_type: str, query: str, lang: str = "zh-CN", page: int = 1) -> Dict[str, Any]:
         """Searches TMDB API for movies, tv shows or multi."""
@@ -178,15 +276,15 @@ class TmdbMetadataService:
 
         url = f"{TMDB_BASE_URL}{endpoint}"
         proxy_url = self.config_service.get_proxy_url('tmdb')
-        
-        async with httpx.AsyncClient(proxy=proxy_url) as client:
-            try:
-                response = await client.get(url, params=params, timeout=10.0)
-                response.raise_for_status()
-                return response.json()
-            except Exception as e:
-                log_audit("元数据", "处理", f"TMDB Search Error ({item_type}): {e}", level="ERROR")
-                return {"page": page, "results": [], "total_pages": 0, "total_results": 0}
+
+        client = await self._get_shared_client(proxy_url)
+        try:
+            response = await client.get(url, params=params, timeout=10.0)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            log_audit("元数据", "处理", f"TMDB Search Error ({item_type}): {e}", level="ERROR")
+            return {"page": page, "results": [], "total_pages": 0, "total_results": 0}
 
     def _transform_releases(self, data: Dict[str, Any]) -> Dict[str, Any]:
         # Transform 'release_dates' structure to local 'releases' structure if needed

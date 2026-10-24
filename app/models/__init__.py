@@ -1,10 +1,15 @@
-from sqlalchemy import Column, String, Integer, Boolean, Text, DateTime
+from sqlalchemy import Column, String, Integer, Boolean, Text, DateTime, Index
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
 class Item(Base):
     __tablename__ = "items"
+    # 列表接口按 item_type 过滤并按 full_date 排序；
+    # 主键 (item_id, item_type) 的前缀是 item_id，无法命中该查询
+    __table_args__ = (
+        Index('ix_items_item_type_full_date', 'item_type', 'full_date'),
+    )
 
     item_id = Column(String, primary_key=True)
     item_type = Column(String, primary_key=True)
@@ -199,6 +204,11 @@ class BangumiTempCache(Base):
 
 class TmdbBangumiMap(Base):
     __tablename__ = "tmdb_bangumi_map"
+    # get_relation_by_bangumi 只按 bangumi_id 查询，
+    # 主键前缀 (tmdb_id, tmdb_type) 用不上，否则全表扫描
+    __table_args__ = (
+        Index('ix_tmdb_bangumi_map_bangumi_id', 'bangumi_id'),
+    )
 
     tmdb_id = Column(String, primary_key=True)
     tmdb_type = Column(String, primary_key=True)

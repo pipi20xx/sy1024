@@ -55,7 +55,10 @@ class EmbyClient:
         # Concurrency control for downloads
         # Increased to 16 to maximize throughput
         self.download_semaphore = asyncio.Semaphore(16)
-        
+
+        # /System/Info 返回的 ServerId 缓存（服务端基本不变）
+        self._cached_server_id: Optional[str] = None
+
         self.item_details_cache = {}
 
         # 全库扫描结果内存缓存（按 emby_type 区分），3 分钟有效期
@@ -345,11 +348,14 @@ class EmbyClient:
         return None, f"Failed to get details for item {emby_item_id} from all endpoints."
 
     async def get_item_playback_info(self, emby_item_id: str) -> tuple[dict | None, str | None]:
-        system_info, err = await self._make_request("GET", "/System/Info")
-        if err or not system_info or not system_info.get("Id"):
-            return None, f"无法从Emby获取System/Info来确定服务器ID: {err or '无有效响应'}"
-        
-        server_id = system_info.get("Id")
+        # ServerId 基本不变，缓存后免去每次调用都先请求一遍 /System/Info
+        if not self._cached_server_id:
+            system_info, err = await self._make_request("GET", "/System/Info")
+            if err or not system_info or not system_info.get("Id"):
+                return None, f"无法从Emby获取System/Info来确定服务器ID: {err or '无有效响应'}"
+            self._cached_server_id = system_info.get("Id")
+
+        server_id = self._cached_server_id
         item_details, err = await self.get_item_details(emby_item_id, fields="Id,Name,Type")
         if err or not item_details:
              return None, f"获取项目详情失败: {err}"

@@ -893,6 +893,28 @@ const imageLanguageSelection = computed<string[]>({
                 注意：即使关闭，本地 <code>images/</code> 中没有的图片仍会走 TMDB 图片代理（按「图片处理机制」的三级查找）。
               </div>
 
+              <v-text-field
+                :model-value="formSettings.tmdb_fetch_cache_ttl ?? 900"
+                @update:model-value="formSettings.tmdb_fetch_cache_ttl = Number($event)"
+                label="远程数据缓存有效期（秒）"
+                type="number"
+                density="compact"
+                variant="outlined"
+                min="0"
+                step="60"
+                hide-details
+                class="mb-2"
+                style="max-width: 280px"
+              />
+              <div class="text-caption text-medium-emphasis ml-12 mb-4">
+                从 TMDB 官方拉取的元数据在内存中的缓存时长，有效期内的重复请求不再回源 TMDB（Emby 刮削同一资源时大量节省请求）。
+                <br>
+                0 = 不缓存（每次都请求 TMDB 官方）；默认 900 秒（15 分钟）。
+                <br>
+                影响范围：远程回退、详情页「从 TMDB 更新元数据」、演员信息更新；
+                本地 Override / patches / 本地图片始终实时生效，不受此缓存影响。
+              </div>
+
               <v-switch v-model="formSettings.tmdb_episode_group_mode" color="primary" hide-details label="剧集组模式" class="mb-2" />
               <div class="text-caption text-medium-emphasis ml-12 mb-4">
                 开启后，模拟器按 override 中该项目的 episodegroup.json（剧集组定义）重组季与集：

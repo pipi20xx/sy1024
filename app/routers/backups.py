@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request, BackgroundTasks, File, UploadFile
 from fastapi.responses import FileResponse
+import asyncio
 import os
 import shutil
 from .. import globals
@@ -16,7 +17,8 @@ async def create_backup(request: Request):
     include_collections = params.get("include_collections", "true").lower() == 'true'
     if not globals.backup_service.is_enabled: raise HTTPException(status_code=400, detail="备份服务未启用。")
     if mode not in ["snapshot", "zip"]: raise HTTPException(status_code=400, detail="mode 参数错误")
-    success, message = globals.backup_service.create_backup(mode, include_override, include_collections)
+    # BackupService 全部是同步重 IO（copytree/压缩/解压），必须放线程池避免阻塞事件循环
+    success, message = await asyncio.to_thread(globals.backup_service.create_backup, mode, include_override, include_collections)
     if not success:
         log_audit("备份", "创建失败", f"模式: {mode}, 错误: {message}", level="ERROR")
         raise HTTPException(status_code=500, detail=message)
@@ -27,7 +29,7 @@ async def create_backup(request: Request):
 async def list_backups():
     """获取服务器上所有可用的备份文件列表。"""
     if not globals.backup_service.is_enabled: return []
-    return globals.backup_service.list_backups()
+    return await asyncio.to_thread(globals.backup_service.list_backups)
 
 @router.post("/api/backups/restore/{filename}", summary="恢复系统备份")
 async def restore_backup(filename: str, background_tasks: BackgroundTasks, request: Request):
@@ -35,7 +37,7 @@ async def restore_backup(filename: str, background_tasks: BackgroundTasks, reque
     mode = request.query_params.get("mode", "merge_add")
     if not globals.backup_service.is_enabled: raise HTTPException(status_code=400, detail="备份服务未启用。")
     if mode not in ["merge_add", "overwrite", "clean_restore"]: raise HTTPException(status_code=400, detail="mode 参数错误")
-    success, message = globals.backup_service.restore_backup(filename, mode)
+    success, message = await asyncio.to_thread(globals.backup_service.restore_backup, filename, mode)
     if not success:
         log_audit("备份", "恢复失败", f"文件: {filename}, 模式: {mode}, 错误: {message}", level="ERROR")
         raise HTTPException(status_code=500, detail=message)
@@ -46,7 +48,7 @@ async def restore_backup(filename: str, background_tasks: BackgroundTasks, reque
 @router.delete("/api/backups/{filename}", summary="删除备份文件")
 async def delete_backup(filename: str):
     """从服务器删除指定的备份文件。"""
-    success, message = globals.backup_service.delete_backup(filename)
+    success, message = await asyncio.to_thread(globals.backup_service.delete_backup, filename)
     if not success: raise HTTPException(status_code=404, detail=message)
     log_audit("备份", "删除", f"文件: {filename}", level="CLEAN")
     return {"message": message}
@@ -58,7 +60,7 @@ async def get_item_backups(item_type: str, item_id: str):
     """获取指定媒体项目的历史备份版本。"""
     if not globals.backup_service.is_enabled:
         return []
-    backups = globals.backup_service.list_item_backups(item_type, item_id)
+    backups = await asyncio.to_thread(globals.backup_service.list_item_backups, item_type, item_id)
     return backups
 
 @router.post("/api/items/{item_type}/{item_id}/backups", summary="创建项目备份")
@@ -67,7 +69,7 @@ async def create_item_backup(item_type: str, item_id: str):
     if not globals.backup_service.is_enabled:
         raise HTTPException(status_code=400, detail="备份服务未启用。")
     
-    success, message = globals.backup_service.create_item_backup(item_type, item_id)
+    success, message = await asyncio.to_thread(globals.backup_service.create_item_backup, item_type, item_id)
     if not success:
         raise HTTPException(status_code=500, detail=message)
     log_audit("备份", "创建项目备份", f"类型: {item_type}, ID: {item_id}", level="SUCCESS")
@@ -79,7 +81,7 @@ async def restore_item_backup(item_type: str, item_id: str, backup_name: str, ba
     if not globals.backup_service.is_enabled:
         raise HTTPException(status_code=400, detail="备份服务未启用。")
     
-    success, message = globals.backup_service.restore_item_backup(item_type, item_id, backup_name)
+    success, message = await asyncio.to_thread(globals.backup_service.restore_item_backup, item_type, item_id, backup_name)
     if not success:
         raise HTTPException(status_code=500, detail=message)
     log_audit("备份", "恢复项目备份", f"类型: {item_type}, ID: {item_id}, 备份: {backup_name}", level="SUCCESS")
@@ -89,7 +91,7 @@ async def restore_item_backup(item_type: str, item_id: str, backup_name: str, ba
 @router.delete("/api/items/{item_type}/{item_id}/backups/{backup_name}", summary="删除项目备份")
 async def delete_item_backup(item_type: str, item_id: str, backup_name: str):
     """删除指定的媒体项目备份文件。"""
-    success, message = globals.backup_service.delete_item_backup(item_type, item_id, backup_name)
+    success, message = await asyncio.to_thread(globals.backup_service.delete_item_backup, item_type, item_id, backup_name)
     if not success: raise HTTPException(status_code=404, detail=message)
     log_audit("备份", "删除项目备份", f"类型: {item_type}, ID: {item_id}, 备份: {backup_name}", level="CLEAN")
     return {"message": message}
@@ -104,7 +106,7 @@ async def export_item_zip(item_type: str, item_id: str):
     if not globals.backup_service.is_enabled:
         raise HTTPException(status_code=400, detail="备份服务未启用。")
     
-    success, file_path, filename = globals.backup_service.get_export_zip_path(item_type, item_id)
+    success, file_path, filename = await asyncio.to_thread(globals.backup_service.get_export_zip_path, item_type, item_id)
     
     if not success:
         raise HTTPException(status_code=400, detail=file_path) # file_path contains error message on failure
@@ -126,10 +128,13 @@ async def import_override_zip(file: UploadFile = File(...), background_tasks: Ba
     temp_file_path = os.path.join(temp_dir, file.filename)
     
     try:
-        with open(temp_file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-            
-        success, message = globals.backup_service.process_import_zip(temp_file_path, file.filename)
+        def _save_upload():
+            with open(temp_file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+
+        await asyncio.to_thread(_save_upload)
+
+        success, message = await asyncio.to_thread(globals.backup_service.process_import_zip, temp_file_path, file.filename)
         
         if success and background_tasks:
              background_tasks.add_task(globals.service.scanner_service.scan_all_data)
@@ -160,7 +165,7 @@ async def export_collection_zip(filename: str):
     if not globals.backup_service.is_enabled:
         raise HTTPException(status_code=400, detail="备份服务未启用。")
     
-    success, file_path, zip_filename = globals.backup_service.get_collection_export_zip_path(filename)
+    success, file_path, zip_filename = await asyncio.to_thread(globals.backup_service.get_collection_export_zip_path, filename)
     
     if not success:
         raise HTTPException(status_code=400, detail=file_path)
@@ -181,10 +186,13 @@ async def import_collection_zip(file: UploadFile = File(...)):
     temp_file_path = os.path.join(temp_dir, file.filename)
     
     try:
-        with open(temp_file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-            
-        success, message = globals.backup_service.process_collection_import_zip(temp_file_path)
+        def _save_upload():
+            with open(temp_file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+
+        await asyncio.to_thread(_save_upload)
+
+        success, message = await asyncio.to_thread(globals.backup_service.process_collection_import_zip, temp_file_path)
         
         if success:
              # Trigger DB sync immediately so frontend gets fresh data

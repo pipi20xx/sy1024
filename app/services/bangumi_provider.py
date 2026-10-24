@@ -1,6 +1,7 @@
 import json
 import httpx
 import os
+import asyncio
 import time
 from collections import OrderedDict
 from typing import Optional, Dict, Any, List, Tuple
@@ -58,7 +59,32 @@ class BangumiProvider:
         # L1 内存缓存: OrderedDict[bgm_id] = (timestamp, subject, episodes, characters)
         # 使用 OrderedDict 实现 LRU，限制最大条目数防止内存无限增长
         self._l1_cache: OrderedDict[int, Tuple[float, Optional[Dict], Optional[List], Optional[List]]] = OrderedDict()
+        # 共享 HTTP 客户端（按代理配置复用，代理变更时重建）
+        self._http_client: Optional[httpx.AsyncClient] = None
+        self._http_client_proxy: Optional[str] = None
+        self._http_client_guard: Optional[asyncio.Lock] = None
         self._initialized = True
+
+    async def _get_http_client(self, proxy: Optional[str]) -> httpx.AsyncClient:
+        """复用共享 AsyncClient，避免每次 API 调用重新建立连接池/TLS 握手。"""
+        if self._http_client_guard is None:
+            self._http_client_guard = asyncio.Lock()
+        client = self._http_client
+        if client is None or client.is_closed or self._http_client_proxy != proxy:
+            async with self._http_client_guard:
+                client = self._http_client
+                if client is None or client.is_closed or self._http_client_proxy != proxy:
+                    old = client
+                    client = httpx.AsyncClient(
+                        timeout=15.0,
+                        proxy=proxy,
+                        limits=httpx.Limits(max_keepalive_connections=10, max_connections=30),
+                    )
+                    self._http_client = client
+                    self._http_client_proxy = proxy
+                    if old is not None and not old.is_closed:
+                        await old.aclose()
+        return client
 
     # ============================== Token & Proxy ==============================
 
@@ -122,8 +148,16 @@ class BangumiProvider:
         return subject, episodes, characters
 
     def _l1_set(self, bgm_id: int, subject: Optional[Dict], episodes: Optional[List], characters: Optional[List]):
-        # 如果已存在，先删除再插入（更新位置到末尾）
-        if bgm_id in self._l1_cache:
+        entry = self._l1_cache.get(bgm_id)
+        if entry is not None:
+            # 部分写回：None 字段保留旧值。get_subject/get_episodes/get_characters
+            # 交错调用时各自只带一类数据，整体覆盖会把其他字段清掉，导致 L1 反复失效。
+            _, old_subject, old_episodes, old_characters = entry
+            if subject is None: subject = old_subject
+            if episodes is None: episodes = old_episodes
+            if characters is None: characters = old_characters
+            if subject is None and episodes is None and characters is None:
+                return
             del self._l1_cache[bgm_id]
         self._l1_cache[bgm_id] = (
             time.time(),
@@ -277,13 +311,13 @@ class BangumiProvider:
         proxy = self._get_proxy()
 
         try:
-            async with httpx.AsyncClient(timeout=15.0, proxy=proxy) as client:
-                resp = await client.get(url, headers=headers)
-                if resp.status_code == 404:
-                    log_audit("Bangumi", "处理", f"Bangumi Subject {subject_id} not found.", level="WARN")
-                    return None
-                resp.raise_for_status()
-                return resp.json()
+            client = await self._get_http_client(proxy)
+            resp = await client.get(url, headers=headers)
+            if resp.status_code == 404:
+                log_audit("Bangumi", "处理", f"Bangumi Subject {subject_id} not found.", level="WARN")
+                return None
+            resp.raise_for_status()
+            return resp.json()
         except Exception as e:
             log_audit("Bangumi", "处理", f"Bangumi API error (subject {subject_id}): {e}", level="ERROR")
             return None
@@ -299,14 +333,14 @@ class BangumiProvider:
         proxy = self._get_proxy()
 
         try:
-            async with httpx.AsyncClient(timeout=15.0, proxy=proxy) as client:
-                resp = await client.get(url, headers=headers)
-                if resp.status_code == 401:
-                    # Retry without token
-                    no_auth_headers = {"User-Agent": headers["User-Agent"], "Accept": "application/json"}
-                    resp = await client.get(url, headers=no_auth_headers)
-                resp.raise_for_status()
-                return resp.json().get('data', [])
+            client = await self._get_http_client(proxy)
+            resp = await client.get(url, headers=headers)
+            if resp.status_code == 401:
+                # Retry without token
+                no_auth_headers = {"User-Agent": headers["User-Agent"], "Accept": "application/json"}
+                resp = await client.get(url, headers=no_auth_headers)
+            resp.raise_for_status()
+            return resp.json().get('data', [])
         except Exception as e:
             log_audit("Bangumi", "处理", f"Bangumi episodes API error (subject {subject_id}): {e}", level="ERROR")
             return []
@@ -317,10 +351,10 @@ class BangumiProvider:
         proxy = self._get_proxy()
 
         try:
-            async with httpx.AsyncClient(timeout=15.0, proxy=proxy) as client:
-                resp = await client.get(url, headers=headers)
-                resp.raise_for_status()
-                return resp.json()
+            client = await self._get_http_client(proxy)
+            resp = await client.get(url, headers=headers)
+            resp.raise_for_status()
+            return resp.json()
         except Exception as e:
             log_audit("Bangumi", "处理", f"Bangumi characters API error (subject {subject_id}): {e}", level="ERROR")
             return []
@@ -463,25 +497,25 @@ class BangumiProvider:
         proxy = self._get_proxy()
 
         try:
-            async with httpx.AsyncClient(timeout=15.0, proxy=proxy) as client:
-                resp = await client.post(url, headers=headers, json=payload)
-                resp.raise_for_status()
-                data = resp.json()
-                results = []
-                for item in data.get('data', [])[:limit]:
-                    results.append({
-                        'id': item.get('id'),
-                        'name': item.get('name', ''),
-                        'name_cn': item.get('name_cn', ''),
-                        'date': item.get('date', ''),
-                        'type': item.get('type', 0),
-                        'platform': item.get('platform', ''),
-                        'summary': item.get('summary', ''),
-                        'tags': item.get('tags', []),
-                        'score': item.get('score', 0),
-                        'images': item.get('images', {})
-                    })
-                return results
+            client = await self._get_http_client(proxy)
+            resp = await client.post(url, headers=headers, json=payload)
+            resp.raise_for_status()
+            data = resp.json()
+            results = []
+            for item in data.get('data', [])[:limit]:
+                results.append({
+                    'id': item.get('id'),
+                    'name': item.get('name', ''),
+                    'name_cn': item.get('name_cn', ''),
+                    'date': item.get('date', ''),
+                    'type': item.get('type', 0),
+                    'platform': item.get('platform', ''),
+                    'summary': item.get('summary', ''),
+                    'tags': item.get('tags', []),
+                    'score': item.get('score', 0),
+                    'images': item.get('images', {})
+                })
+            return results
         except Exception as e:
             log_audit("Bangumi", "处理", f"Bangumi search API error for '{query}': {e}", level="ERROR")
             return []
