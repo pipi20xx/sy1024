@@ -39,6 +39,12 @@ const posterOptions = [
   { title: '无海报', value: 'no' },
 ]
 
+const episodeGroupOptions = [
+  { title: '剧集组', value: null },
+  { title: '有剧集组', value: 'yes' },
+  { title: '无剧集组', value: 'no' },
+]
+
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 function handleSearchInput(value: string) {
@@ -54,7 +60,7 @@ onUnmounted(() => {
 // 是否有活跃的筛选条件（不含搜索）
 const hasActiveFilters = computed(() =>
   !!store.selectedGenre || !!store.selectedYear || !!store.selectedMonth ||
-  !!store.selectedSource || !!store.selectedPosterStatus || store.sortBy !== 'date_desc'
+  !!store.selectedSource || !!store.selectedPosterStatus || !!store.selectedEpisodeGroup || store.sortBy !== 'date_desc'
 )
 
 // 活跃筛选条件数量
@@ -65,6 +71,7 @@ const activeFilterCount = computed(() => {
   if (store.selectedMonth) count++
   if (store.selectedSource) count++
   if (store.selectedPosterStatus) count++
+  if (store.selectedEpisodeGroup) count++
   if (store.sortBy !== 'date_desc') count++
   return count
 })
@@ -130,7 +137,7 @@ function handleResetFilters() {
     </v-row>
 
     <!-- 筛选状态标签 -->
-    <div v-if="store.searchTerm || store.selectedGenre || store.selectedYear || store.selectedMonth || store.selectedSource || store.selectedPosterStatus" class="d-flex flex-wrap ga-1 mt-2">
+    <div v-if="store.searchTerm || store.selectedGenre || store.selectedYear || store.selectedMonth || store.selectedSource || store.selectedPosterStatus || store.selectedEpisodeGroup" class="d-flex flex-wrap ga-1 mt-2">
       <v-chip v-if="store.searchTerm" size="small" closable @click:close="store.searchTerm = ''; store.applyFilters()" variant="tonal" label>
         <v-icon start size="x-small">mdi-magnify</v-icon>{{ store.searchTerm }}
       </v-chip>
@@ -139,6 +146,7 @@ function handleResetFilters() {
       <v-chip v-if="store.selectedMonth" size="small" closable @click:close="store.selectedMonth = null; store.applyFilters()" variant="tonal" label>{{ store.selectedMonth }}月</v-chip>
       <v-chip v-if="store.selectedSource" size="small" closable @click:close="store.selectedSource = null; store.applyFilters()" variant="tonal" label>来源: {{ store.selectedSource }}</v-chip>
       <v-chip v-if="store.selectedPosterStatus" size="small" closable @click:close="store.selectedPosterStatus = null; store.applyFilters()" variant="tonal" label>海报: {{ store.selectedPosterStatus === 'yes' ? '有' : '无' }}</v-chip>
+      <v-chip v-if="store.selectedEpisodeGroup" size="small" closable @click:close="store.selectedEpisodeGroup = null; store.applyFilters()" variant="tonal" label>剧集组: {{ store.selectedEpisodeGroup === 'yes' ? '有' : '无' }}</v-chip>
     </div>
 
     <!-- 高级筛选弹框 -->
@@ -214,6 +222,19 @@ function handleResetFilters() {
                 item-title="title"
                 item-value="value"
                 label="海报状态"
+                density="compact"
+                variant="outlined"
+              />
+            </v-col>
+
+            <!-- 剧集组状态（仅剧集） -->
+            <v-col v-if="store.currentItemType === 'tmdb-tv'" cols="12" sm="6">
+              <v-select
+                v-model="store.selectedEpisodeGroup"
+                :items="episodeGroupOptions"
+                item-title="title"
+                item-value="value"
+                label="剧集组"
                 density="compact"
                 variant="outlined"
               />

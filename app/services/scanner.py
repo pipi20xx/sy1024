@@ -195,6 +195,7 @@ class ScannerService:
     async def get_items(self, item_type: str, search_term: Optional[str] = None, source: Optional[str] = None, 
                   poster_status: Optional[str] = None, genres: Optional[List[str]] = None, 
                   year: Optional[int] = None, month: Optional[int] = None, 
+                  has_episode_group: Optional[str] = None,
                   sort_by: Optional[str] = None,
                   page: int = 1, limit: int = 50) -> Dict[str, Any]:
         try:
@@ -209,6 +210,8 @@ class ScannerService:
                 if source: query = query.where(Item.source == source)
                 if poster_status == "yes": query = query.where(Item.poster_path != None)
                 elif poster_status == "no": query = query.where(Item.poster_path == None)
+                if has_episode_group == "yes": query = query.where(Item.has_episode_group.is_(True))
+                elif has_episode_group == "no": query = query.where(or_(Item.has_episode_group.is_(False), Item.has_episode_group.is_(None)))
                 if genres:
                     for genre in genres: query = query.where(Item.genres.like(f'%"{genre}"%'))
                 
@@ -267,7 +270,7 @@ class ScannerService:
     async def get_all_item_ids_by_filter(self, item_type: str, search_term: Optional[str] = None, 
                                      source: Optional[str] = None, poster_status: Optional[str] = None, 
                                      genres: Optional[List[str]] = None, year: Optional[int] = None, 
-                                     month: Optional[int] = None) -> List[str]:
+                                     month: Optional[int] = None, has_episode_group: Optional[str] = None) -> List[str]:
         async with ItemsSessionLocal() as session:
             query = select(Item.item_id).where(Item.item_type == item_type)
             parser = QueryParser(search_term)
@@ -278,6 +281,8 @@ class ScannerService:
             if source: query = query.where(Item.source == source)
             if poster_status == "yes": query = query.where(Item.poster_path != None)
             elif poster_status == "no": query = query.where(Item.poster_path == None)
+            if has_episode_group == "yes": query = query.where(Item.has_episode_group.is_(True))
+            elif has_episode_group == "no": query = query.where(or_(Item.has_episode_group.is_(False), Item.has_episode_group.is_(None)))
             if genres:
                 for genre in genres: query = query.where(Item.genres.like(f'%"{genre}"%'))
             if year:

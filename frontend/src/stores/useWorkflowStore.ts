@@ -36,6 +36,7 @@ export const useWorkflowStore = defineStore('workflow', () => {
     if (itemStore.searchTerm) filters.search_term = itemStore.searchTerm
     if (itemStore.selectedSource) filters.source = itemStore.selectedSource
     if (itemStore.selectedPosterStatus) filters.poster_status = itemStore.selectedPosterStatus
+    if (itemStore.selectedEpisodeGroup) filters.has_episode_group = itemStore.selectedEpisodeGroup
     if (itemStore.selectedGenre) filters.genres = [itemStore.selectedGenre]
     if (itemStore.selectedYear) filters.year = itemStore.selectedYear
     if (itemStore.selectedMonth) filters.month = itemStore.selectedMonth

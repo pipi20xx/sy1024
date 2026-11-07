@@ -6,6 +6,7 @@ interface GetItemsParams {
   search_term?: string
   source?: 'primary' | 'override'
   poster_status?: 'yes' | 'no'
+  has_episode_group?: 'yes' | 'no'
   genres?: string[]
   year?: string
   month?: string

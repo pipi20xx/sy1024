@@ -53,6 +53,7 @@ async def get_items_by_type(item_type: str, request: Request):
         genres=params.getlist("genre"),
         year=int(year_str) if year_str and year_str.isdigit() else None,
         month=int(month_str) if month_str and month_str.isdigit() else None,
+        has_episode_group=params.get("has_episode_group"),
         sort_by=params.get("sort_by"),
         page=page,
         limit=limit
@@ -581,6 +582,7 @@ async def create_episode_group(series_id: str):
     success, message = await globals.service.editor_service.create_episode_group_file(series_id)
     if not success: raise HTTPException(status_code=400, detail=message)
     log_audit("编辑", "创建", f"已创建剧集组文件: {series_id}", level="SUCCESS")
+    await globals.service.scanner_service.refresh_item_cache("tmdb-tv", series_id)
     return JSONResponse(status_code=200, content={"message": message, "success": True, "updated_details": await globals.service.editor_service.get_item_full_details("tmdb-tv", series_id)})
 
 @router.delete("/api/tv/{series_id}/episodegroup", summary="删除剧集组文件")
@@ -589,6 +591,7 @@ async def delete_episode_group(series_id: str):
     success, message = await globals.service.editor_service.delete_episode_group_file(series_id)
     if not success: raise HTTPException(status_code=500, detail=message)
     log_audit("编辑", "删除", f"已删除剧集组文件: {series_id}", level="CLEAN")
+    await globals.service.scanner_service.refresh_item_cache("tmdb-tv", series_id)
     return JSONResponse(status_code=200, content={"message": message, "success": True, "updated_details": await globals.service.editor_service.get_item_full_details("tmdb-tv", series_id)})
 
 @router.get("/api/tv/{series_id}/episodeorder", summary="获取剧集排序内容")

@@ -42,7 +42,8 @@ async def run_workflow_in_background(item_type: str, tasks: List[Dict], interval
                 poster_status=filters.get("poster_status"),
                 genres=list(filters.get("genres")) if filters.get("genres") else None,
                 year=year_int,
-                month=month_int
+                month=month_int,
+                has_episode_group=filters.get("has_episode_group")
             )
         else:
             log_audit("工作流", "启动失败", "未提供项目ID或筛选条件", level="WARN")

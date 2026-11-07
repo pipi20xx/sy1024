@@ -17,6 +17,7 @@ export const useItemStore = defineStore('item', () => {
   const searchTerm = ref('')
   const selectedSource = ref<string | null>(null)
   const selectedPosterStatus = ref<string | null>(null)
+  const selectedEpisodeGroup = ref<string | null>(null)
   const selectedGenre = ref<string | null>(null)
   const selectedYear = ref<string | null>(null)
   const selectedMonth = ref<string | null>(null)
@@ -45,6 +46,7 @@ export const useItemStore = defineStore('item', () => {
         search_term: searchTerm.value || undefined,
         source: selectedSource.value as any,
         poster_status: selectedPosterStatus.value as any,
+        has_episode_group: selectedEpisodeGroup.value as any,
         genres: selectedGenre.value ? [selectedGenre.value] : undefined,
         year: selectedYear.value || undefined,
         month: selectedMonth.value ? String(selectedMonth.value) : undefined,
@@ -119,6 +121,7 @@ export const useItemStore = defineStore('item', () => {
     searchTerm.value = ''
     selectedSource.value = null
     selectedPosterStatus.value = null
+    selectedEpisodeGroup.value = null
     selectedGenre.value = null
     selectedYear.value = null
     selectedMonth.value = null
@@ -167,7 +170,7 @@ export const useItemStore = defineStore('item', () => {
 
   return {
     items, total, currentPage, limit, hasNextPage, isLoading, error, currentItemType,
-    searchTerm, selectedSource, selectedPosterStatus, selectedGenre, selectedYear, selectedMonth, sortBy,
+    searchTerm, selectedSource, selectedPosterStatus, selectedEpisodeGroup, selectedGenre, selectedYear, selectedMonth, sortBy,
     availableGenres, availableYears,
     loadItems, loadMoreItems, setCurrentItemType, loadAvailableFilters, applyFilters, resetFilters,
     updateLibraryStatus,
