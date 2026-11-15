@@ -135,6 +135,10 @@ html.glass-theme-acg {
     --glass-raised-backdrop-filter: none;
     --glass-fixed-shell-backdrop-filter: none;
     --glass-fixed-shell-backplate-filter: none;
+    // 关键：渲染器 ready 后标准表面会用此原生磨砂基底覆盖卡片，
+    // 完全透明必须一并置空，否则卡片会出现 blur(16px) 的意外磨砂，
+    // 滚动时磨砂边界随内容移动形成抖动/残影。
+    --glass-native-surface-backdrop-filter: none;
     // 同步覆盖 visual.css 中 !important 的 backdrop-filter 变量
     --am-surface-blur: none;
     --am-surface-bg: transparent;
@@ -420,6 +424,49 @@ html.glass-theme-acg {
   .v-overlay__content.dialog-transition-leave-to {
     filter: none;
     transform: none;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // Tab 面板切换（v-window）— 玻璃主题下改为纯淡入淡出
+  // 默认 translateX/Y 位移会让卡片 backdrop-filter 与光学渲染层
+  // 在动画期间反复重采样移动中的表面；整理历史/后台任务等大量玻璃卡片
+  // 的 Tab 切换时会出现抖动/残影。与上方弹层处理同理：去掉位移，只保留 opacity。
+  // ═══════════════════════════════════════════════════════════════
+  .v-window-x-transition-enter-active,
+  .v-window-x-transition-leave-active,
+  .v-window-x-reverse-transition-enter-active,
+  .v-window-x-reverse-transition-leave-active,
+  .v-window-y-transition-enter-active,
+  .v-window-y-transition-leave-active,
+  .v-window-y-reverse-transition-enter-active,
+  .v-window-y-reverse-transition-leave-active {
+    transition: opacity var(--glass-motion);
+    will-change: opacity;
+  }
+
+  .v-window-x-transition-enter-from,
+  .v-window-x-reverse-transition-enter-from,
+  .v-window-y-transition-enter-from,
+  .v-window-y-reverse-transition-enter-from {
+    transform: none;
+    opacity: 0;
+  }
+
+  .v-window-x-transition-leave-to,
+  .v-window-x-reverse-transition-leave-to,
+  .v-window-y-transition-leave-to,
+  .v-window-y-reverse-transition-leave-to {
+    transform: none;
+    opacity: 0;
+  }
+
+  // v-window 容器高度在 Tab 切换时由 Vuetify 做 0.3s 过渡。高度动画会让
+  // .app-wrapper（scroll 光学画布的容器）连续变化，而 scroll canvas 的
+  // backing buffer 走 80ms×2 去抖才重分配，期间浏览器把旧缓冲拉伸到新的
+  // CSS 尺寸，水纹被压扁/错位，形成「抖动 + 残影」。这里改为瞬时切换，
+  // 内容高度变成离散变化，renderer 可同步重分配缓冲，彻底消除残影。
+  .v-window__container {
+    transition: none !important;
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -852,6 +899,22 @@ html.glass-theme-acg:is(
   )[data-glass-renderer-state='ready']
   .glass-optical-layer {
   opacity: 1;
+}
+
+// 异步滚动期间只暂停 GPU 动态层；原生壁纸基底不发生材质切换。
+// 照搬 MP glass.scss 1555-1557。缺少此规则会导致滚动时 scroll canvas 仍然可见，
+// 与原生 backdrop-filter 叠加产生闪烁。
+// page 模式下 JS 不会设置 data-glass-scroll-presentation 属性，因此此规则不会生效。
+html[data-glass-scroll-presentation='native'][data-glass-renderer-state='ready']
+  .glass-optical-layer--scroll {
+  opacity: 0 !important;
+}
+
+// 完全透明材质没有 backdrop-filter 遮挡，fixed 画布（导航/顶栏水纹）在滚动期间
+// 的合成抖动会直接暴露出来；滚动期间同样隐藏 fixed 画布，避免残影。
+html.glass-theme-acg[data-glass-appearance='transparent'][data-glass-scroll-presentation='native'][data-glass-renderer-state='ready']
+  .glass-optical-layer--fixed {
+  opacity: 0 !important;
 }
 
 // 光学档位先交由 renderer 接管标准表面；各材质在后续规则恢复必要的原生背板。

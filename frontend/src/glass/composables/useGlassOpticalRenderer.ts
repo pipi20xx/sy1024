@@ -1049,8 +1049,10 @@ ${GLASS_FLUID_FRAGMENT_SURFACE_REFRACTION}
     float dynamicsPresence = max(materialEnergy, sharedMotionPresence * 0.36);
     float dynamicsAlpha =
       clamp(dynamicsPresence * mix(0.5, 0.72, uQuality) * mix(1.0, 1.12, frosted), 0.0, 0.82);
-    // transparent 材质在 dynamics-only 模式下提升动态可见度
-    dynamicsAlpha = mix(dynamicsAlpha, clamp(dynamicsAlpha + 0.12, 0.0, 0.88), transparent);
+    // transparent 材质在 dynamics-only 模式下提升动态可见度；改用比例增强而非
+    // 固定 +0.12 偏移，避免静止时整页残留一层 0.12 的壁纸覆盖——滚动降级隐藏
+    // 画布时这层覆盖消失会导致整页变暗/发糊。
+    dynamicsAlpha = mix(dynamicsAlpha, clamp(dynamicsAlpha * 1.4, 0.0, 0.88), transparent);
     gl_FragColor = vec4(refracted, dynamicsAlpha);
     return;
   }
@@ -1313,6 +1315,8 @@ export function useGlassOpticalRenderer(options: UseGlassOpticalRendererOptions)
   let presentationResizeCandidate = ''
   let presentationResizeStableSamples = 0
   let presentationResizeTimer: number | null = null
+  let lastHandledViewportWidth = window.innerWidth
+  let lastHandledViewportHeight = window.innerHeight
   let scrollAnimationFrame: number | null = null
   let scrollDirty = false
   let scrollPresentationRestoreTimer: number | null = null
@@ -1360,6 +1364,9 @@ export function useGlassOpticalRenderer(options: UseGlassOpticalRendererOptions)
     (presentationSpace === 'fixed' &&
       (toValue(options.appearance) === 'frosted' || toValue(options.appearance) === 'transparent'))
   const getSurfaceMode = (): ThemeCustomizerGlassSurfaceMode => toValue(options.surfaceMode) ?? 'card'
+  // 仅用户显式选择的「整页玻璃」模式使用整页单一表面；完全透明材质保持与其它材质
+  // 一致的卡片表面收集，滚动时同样走原生降级（隐藏 scroll 画布），避免整页表面
+  // 在滚动路径上引入额外的重绘/残影。
   const isPageSurfaceMode = () => getSurfaceMode() === 'page'
   const wallpaperSourceCache = options.wallpaperSourceCache ?? createGlassWallpaperSourceCache()
 
@@ -1397,7 +1404,10 @@ export function useGlassOpticalRenderer(options: UseGlassOpticalRendererOptions)
 
     // page 模式下整页为单一 WebGL 表面，壁纸纹理是 GPU 纹理而非 DOM 采样，
     // 滚动时无需降级到原生 backdrop，避免 canvas 可见性切换导致闪烁。
-    if (isPageSurfaceMode()) return
+    // 但「完全透明」材质在 page 模式下几乎没有材质底色兜底，scissor 逐帧重绘的
+    // 一帧滞后会直接露出上一帧水纹（残影），因此完全透明即使处于 page 模式，
+    // 滚动期间仍需隐藏 scroll 画布来消除残影。
+    if (isPageSurfaceMode() && toValue(options.appearance) !== 'transparent') return
 
     clearScrollPresentationRestoreTimer()
     scrollPresentationRestoreTimer = window.setTimeout(() => finishNativeScrollPresentation(), 180)
@@ -2340,7 +2350,17 @@ export function useGlassOpticalRenderer(options: UseGlassOpticalRendererOptions)
     const presentationRoot = presentationSpace === 'scroll' ? options.canvas.value?.parentElement : null
     const presentationChanged = presentationRoot && entries.some(entry => entry.target === presentationRoot)
     if (presentationChanged && commitActivePagePresentation()) return
-    if (presentationChanged) schedulePresentationResizeUpdate()
+    if (presentationChanged) {
+      // 窗口缩放（视口变化）走 80ms×2 去抖，避免连续重分配缓冲；
+      // Tab 切换等内容高度变化是离散事件，同步重分配，避免旧缓冲被浏览器
+      // 拉伸到新的 CSS 尺寸，造成水纹压扁/错位的「残影 + 抖动」。
+      const viewportResized =
+        window.innerWidth !== lastHandledViewportWidth || window.innerHeight !== lastHandledViewportHeight
+      lastHandledViewportWidth = window.innerWidth
+      lastHandledViewportHeight = window.innerHeight
+      if (viewportResized) schedulePresentationResizeUpdate()
+      else resizeRenderer()
+    }
     if (!entries.some(entry => entry.target !== presentationRoot)) return
     if (queueScrollGeometryRefresh(false)) return
 

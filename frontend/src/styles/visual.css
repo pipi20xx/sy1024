@@ -819,6 +819,19 @@ body {
  *    统一风格，区分主区域(8px)和子区域(6px)两种宽度
  * ============================================================ */
 
+/* 主文档始终预留滚动条槽位，避免内容高度变化（有无滚动条）引起视口宽度跳动，
+   进而使 fixed 壁纸（background-size: cover）在切换内容时发生缩放。 */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Vuetify 弹窗滚动锁会给根元素加 --v-scrollbar-offset 补偿滚动条宽度；
+   但 html 已用 scrollbar-gutter: stable 固定预留槽位，再补偿会重复 8px，
+   导致弹窗打开时整页内容左移。这里把根元素上的补偿归零。 */
+html.v-overlay-scroll-blocked {
+  --v-scrollbar-offset: 0px !important;
+}
+
 /* Firefox — 所有可滚动区域统一 */
 html, body, .v-main, .v-main__scroller,
 .v-navigation-drawer, .v-navigation-drawer .v-navigation-drawer__content, .v-navigation-drawer .v-list,
