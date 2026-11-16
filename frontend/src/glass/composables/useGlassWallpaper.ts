@@ -4,7 +4,9 @@ import { useEffectiveGlassSettings, applyStoredThemeCustomizerAppearance, themeC
 import { normalizeThemeMaterialAccent } from '../utils/glassColor'
 import { loadGlassWallpaperTone, DEFAULT_GLASS_WALLPAPER_TONE_PROFILE, type GlassWallpaperToneProfile } from '../utils/glassWallpaperTone'
 import { useTheme } from 'vuetify'
-import { appearanceApi, type WallpaperConfig, type WallpaperApiSource } from '@/api/appearance'
+import { appearanceApi, type WallpaperConfig, type WallpaperApiSource, type WallpaperHistory, type WallpaperUpload } from '@/api/appearance'
+import { createBackgroundCandidateOrderResolver, normalizeBackgroundRotationIntervalSeconds } from '../utils/backgroundRotation'
+import { createBackgroundTimer, type BackgroundTimerHandle } from '@/utils/backgroundManager'
 
 /**
  * 全局壁纸刷新信号 —— 递增后触发 App.vue 中的 watch 重新加载壁纸。
@@ -83,7 +85,7 @@ export function useGlassWallpaper() {
     if (cfg.source_type === 'url') {
       return isRandomWallpaperUrl(cfg.custom_url)
     }
-    // upload 模式不是随机的
+    // upload / history 本地图不是随机的
     return false
   })
 
@@ -157,36 +159,51 @@ export function useGlassWallpaper() {
         api_source_id: 'loliapi_acg_pc',
         custom_url: '',
         upload_filename: '',
-        cache_ttl: 30,
+        history_filename: '',
+        refresh_interval: 60,
+        display_mode: 'latest',
+        rotation_interval: 60,
+        rotation_include_history: true,
+        rotation_include_uploads: false,
       }
     }
   }
 
-  /** 重新加载壁纸（从后端读取最新配置后刷新壁纸 URL） */
-  async function refreshWallpaper() {
-    await loadWallpaperConfig()
-    // 随机源加 cache-buster，固定源不加
-    const proxyUrl = isCurrentSourceRandom.value
+  /** 根据当前配置构建代理 URL（随机源加 cache-buster，固定源不加）。 */
+  function proxyUrlForConfiguredSource() {
+    return isCurrentSourceRandom.value
       ? `/api/appearance/wallpaper_proxy?_ts=${Date.now()}`
       : `/api/appearance/wallpaper_proxy?_v=${Date.now()}`
-    if (proxyUrl === wallpaperUrl.value) return
-    previousWallpaperUrl.value = wallpaperUrl.value
-    wallpaperUrl.value = proxyUrl
-    transitionStartedAt.value = performance.now()
-    syncWallpaperCssVar(proxyUrl)
-    void loadWallpaperTone(proxyUrl)
+  }
+
+  /** 应用当前配置对应的壁纸；api 源默认 = 历史图库最新一张，轮播模式则由轮播范围决定。 */
+  async function applyConfiguredWallpaper() {
+    await loadWallpaperConfig()
+    if (wallpaperConfig.value?.source_type !== 'api') {
+      applyWallpaperUrl(proxyUrlForConfiguredSource())
+      void setupDisplayStrategy()
+      return
+    }
+    if (displayMode.value === 'rotation') {
+      // 轮播模式：初始壁纸交给 setupRotation 从轮播范围挑选，避免回落到代理实时下载
+      await setupDisplayStrategy()
+      return
+    }
+    const items = await loadHistoryItems()
+    const latest = items[0]?.filename ?? ''
+    applyWallpaperUrl(latest ? historyUrlForFilename(latest) : proxyUrlForConfiguredSource())
+    void setupDisplayStrategy()
+  }
+
+  /** 重新加载壁纸（从后端读取最新配置后刷新壁纸 URL） */
+  async function refreshWallpaper() {
+    await applyConfiguredWallpaper()
   }
 
   /** 设置壁纸源 URL（兼容旧接口，内部转换为代理 URL） */
   function setWallpaperUrl(url: string) {
     if (!url) return
-    const proxyUrl = buildProxyUrl(url)
-    if (proxyUrl === wallpaperUrl.value) return
-    previousWallpaperUrl.value = wallpaperUrl.value
-    wallpaperUrl.value = proxyUrl
-    transitionStartedAt.value = performance.now()
-    syncWallpaperCssVar(proxyUrl)
-    void loadWallpaperTone(proxyUrl)
+    applyWallpaperUrl(buildProxyUrl(url))
   }
 
   /** 将壁纸 URL 同步到 CSS 变量 */
@@ -218,21 +235,184 @@ export function useGlassWallpaper() {
     }
   }
 
-  /** 初始化默认壁纸 —— 从后端读取配置，经代理供 WebGL 使用。 */
+  let previousWallpaperClearTimer: ReturnType<typeof setTimeout> | null = null
+
+  /** 切换壁纸 URL，并触发 CSS 变量同步、tone 分析与过渡计时。 */
+  function applyWallpaperUrl(url: string) {
+    if (!url || url === wallpaperUrl.value) return
+    previousWallpaperUrl.value = wallpaperUrl.value
+    wallpaperUrl.value = url
+    transitionStartedAt.value = performance.now()
+    syncWallpaperCssVar(url)
+    void loadWallpaperTone(url)
+
+    // 过渡结束后清空 previous 槽，作为「共享切换事务完成」信号驱动 renderer 归一
+    if (previousWallpaperClearTimer !== null) window.clearTimeout(previousWallpaperClearTimer)
+    previousWallpaperClearTimer = window.setTimeout(() => {
+      previousWallpaperClearTimer = null
+      previousWallpaperUrl.value = ''
+    }, TRANSITION_DURATION_MS)
+  }
+
+  // ── 显示策略：跟随最新（latest）或 图库轮播（rotation） ──
+  const latestHistoryFilename = ref<string>('')
+  const rotationOrder = ref<string[]>([])
+  const resolveCandidateOrder = createBackgroundCandidateOrderResolver()
+  const rotationAvailable = new Set<string>()
+  const rotationFailed = new Set<string>()
+  let displayTimer: BackgroundTimerHandle | null = null
+  let displayGeneration = 0
+  let rotationIndex = 0
+
+  /** 只有在线随机源（api）未手动选图时启用显示策略；upload/history/url 为手动固定。 */
+  const isOnlineSource = computed(() => wallpaperConfig.value?.source_type === 'api')
+  /** 显示方式：latest 跟随最新 | rotation 图库轮播。 */
+  const displayMode = computed(() => (wallpaperConfig.value?.display_mode === 'rotation' ? 'rotation' : 'latest'))
+
+  function historyUrlForFilename(filename: string) {
+    return `/api/appearance/wallpaper/uploads/${encodeURIComponent(filename)}`
+  }
+
+  async function loadHistoryItems(): Promise<WallpaperHistory[]> {
+    try {
+      return await appearanceApi.listHistory()
+    } catch {
+      return []
+    }
+  }
+
+  async function loadUploadItems(): Promise<WallpaperUpload[]> {
+    try {
+      return await appearanceApi.listUploads()
+    } catch {
+      return []
+    }
+  }
+
+  function stopDisplayTimer() {
+    displayTimer?.stop()
+    displayTimer = null
+  }
+
+  function reducedMotionQuery() {
+    return matchMedia('(prefers-reduced-motion: reduce)').matches
+  }
+
+  // —— latest：跟随历史最新一张 ——
+  async function followLatestOnce() {
+    const items = await loadHistoryItems()
+    if (!isOnlineSource.value || displayMode.value !== 'latest') return
+    const filename = items[0]?.filename ?? ''
+    if (!filename || filename === latestHistoryFilename.value) return
+    latestHistoryFilename.value = filename
+    applyWallpaperUrl(historyUrlForFilename(filename))
+  }
+
+  async function setupLatestFollowing(generation: number) {
+    const items = await loadHistoryItems()
+    if (generation !== displayGeneration) return
+    latestHistoryFilename.value = items[0]?.filename ?? ''
+    const configured = normalizeBackgroundRotationIntervalSeconds(wallpaperConfig.value?.refresh_interval)
+    if (configured <= 0) return
+    // 后端按 refresh_interval 下载新图；前端用更短周期发现变化，避免多等一整轮
+    const pollInterval = Math.max(10, Math.min(configured, 60))
+    displayTimer = createBackgroundTimer({
+      intervalSeconds: pollInterval,
+      onTick: () => void followLatestOnce(),
+      reducedMotion: reducedMotionQuery,
+    })
+  }
+
+  // —— rotation：只在历史图库内随机轮播 ——
+  async function preloadCandidate(url: string): Promise<boolean> {
+    if (rotationAvailable.has(url)) return true
+    if (rotationFailed.has(url)) return false
+    try {
+      const result = await loadGlassWallpaperTone(url)
+      if (result.corsReady) {
+        rotationAvailable.add(url)
+        return true
+      }
+      rotationFailed.add(url)
+      return false
+    } catch {
+      rotationFailed.add(url)
+      return false
+    }
+  }
+
+  async function rotateToNextWallpaper() {
+    const order = rotationOrder.value
+    if (order.length === 0) return
+    for (let step = 0; step < order.length; step += 1) {
+      rotationIndex = (rotationIndex + 1) % order.length
+      const url = order[rotationIndex]
+      if (!url || url === wallpaperUrl.value) continue
+      const available = await preloadCandidate(url)
+      if (!isOnlineSource.value || displayMode.value !== 'rotation') return
+      if (available) {
+        applyWallpaperUrl(url)
+        return
+      }
+    }
+  }
+
+  async function setupRotation(generation: number) {
+    let includeHistory = wallpaperConfig.value?.rotation_include_history !== false
+    let includeUploads = wallpaperConfig.value?.rotation_include_uploads === true
+    // 兜底：两个范围都没勾选时回到历史图库
+    if (!includeHistory && !includeUploads) includeHistory = true
+
+    const [historyItems, uploadItems] = await Promise.all([
+      includeHistory ? loadHistoryItems() : Promise.resolve<WallpaperHistory[]>([]),
+      includeUploads ? loadUploadItems() : Promise.resolve<WallpaperUpload[]>([]),
+    ])
+    if (generation !== displayGeneration) return
+
+    const filenames = new Set<string>()
+    for (const item of historyItems) if (item.filename) filenames.add(item.filename)
+    for (const item of uploadItems) if (item.filename) filenames.add(item.filename)
+
+    const urls = [...filenames].map(historyUrlForFilename)
+    rotationOrder.value = resolveCandidateOrder(urls)
+    rotationAvailable.clear()
+    rotationFailed.clear()
+    rotationIndex = -1
+    if (rotationOrder.value.length === 0) return
+    // 立即从轮播范围选中首个可用候选，避免开启轮播瞬间仍停留在代理/旧图
+    await rotateToNextWallpaper()
+    if (generation !== displayGeneration) return
+    if (rotationOrder.value.length < 2) return
+    const interval = normalizeBackgroundRotationIntervalSeconds(wallpaperConfig.value?.rotation_interval)
+    if (interval <= 0) return
+    displayTimer = createBackgroundTimer({
+      intervalSeconds: interval,
+      onTick: () => void rotateToNextWallpaper(),
+      reducedMotion: reducedMotionQuery,
+    })
+  }
+
+  /** 根据配置选择显示策略；手动选中时停掉一切跟随/轮播。 */
+  async function setupDisplayStrategy() {
+    const generation = ++displayGeneration
+    stopDisplayTimer()
+    if (!isOnlineSource.value) {
+      latestHistoryFilename.value = ''
+      rotationOrder.value = []
+      return
+    }
+    if (displayMode.value === 'rotation') {
+      await setupRotation(generation)
+    } else {
+      await setupLatestFollowing(generation)
+    }
+  }
+
+  /** 初始化默认壁纸 —— 从后端读取配置；api 源默认显示历史图库最新一张。 */
   async function initDefaultWallpaper() {
     if (defaultWallpaperInitialized) return
     defaultWallpaperInitialized = true
-
-    // 先从后端加载配置
-    await loadWallpaperConfig()
-
-    // 根据配置构建正确的代理 URL
-    const proxyUrl = isCurrentSourceRandom.value
-      ? `/api/appearance/wallpaper_proxy?_ts=${Date.now()}`
-      : `/api/appearance/wallpaper_proxy?_v=${Date.now()}`
-    wallpaperUrl.value = proxyUrl
-    syncWallpaperCssVar(proxyUrl)
-    void loadWallpaperTone(proxyUrl)
+    await applyConfiguredWallpaper()
   }
 
   // 当切换到 ACG 主题时，应用玻璃设置并初始化壁纸

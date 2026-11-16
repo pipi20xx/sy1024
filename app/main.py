@@ -109,6 +109,13 @@ async def startup_event():
         service = SystemService()
         globals.service = service
         await service.init_databases()
+
+        # 壁纸后台预取：启动即预取当前源，之后按 refresh_interval 定时换图（避免打开页面实时下载卡顿）
+        try:
+            from app.wallpaper_service import wallpaper_prefetch_loop
+            asyncio.create_task(wallpaper_prefetch_loop())
+        except Exception as e:
+            logger.warning(f"壁纸后台预取启动失败: {e}")
         
         # 延迟导入以避免循环依赖
         from app.emby_collection_service import EmbyCollectionService

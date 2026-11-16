@@ -196,14 +196,15 @@ watch(activeBackgroundImage, async (newUrl, oldUrl) => {
   // 先预加载壁纸（CORS 检查 + tone 分析）
   await preloadWallpaperCandidate(newUrl)
 
-  // 触发交叉淡化
+  // 立即开始交叉淡化：新图 standby→active 淡入，旧图 active→previous 淡出，
+  // 与 WebGL 双纹理过渡共用同一 1.5s 时钟，避免旧图残影。
   backgroundLayers.value = prepareLoginBackgroundLayer(backgroundLayers.value, newUrl)
+  backgroundLayers.value = activateLoginBackgroundLayer(backgroundLayers.value)
   isBackgroundCrossfading.value = true
   backgroundCrossfadeStartedAt.value = performance.now()
 
-  // 延迟完成交叉淡化
+  // 淡出完成后回收旧图层
   window.setTimeout(() => {
-    backgroundLayers.value = activateLoginBackgroundLayer(backgroundLayers.value)
     backgroundLayers.value = settleLoginBackgroundLayers(backgroundLayers.value)
     isBackgroundCrossfading.value = false
   }, BACKGROUND_CROSSFADE_DURATION_MS)
